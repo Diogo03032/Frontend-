@@ -2,7 +2,9 @@
 
 ## API utilizada
 
-Base configurável em `VITE_API_URL`; padrão `/api/v1` no backend local, porta 3333.
+Backend mantido no repositório [joaovictorcascardo/fcv-backend](https://github.com/joaovictorcascardo/fcv-backend). Este repositório contém somente o portal web e seu cliente REST. API, autenticação no servidor, Knex, migrations, seeds e acesso ao banco pertencem ao backend separado.
+
+Base configurável em `VITE_API_URL`; padrão `http://localhost:3333/api/v1` para o serviço backend local. Em outro ambiente, essa variável deve apontar para o endereço publicado do mesmo serviço. O navegador acessa a API por HTTP, sem conexão direta ao banco.
 
 - Autenticação: POST `/auth/login`, GET `/auth/eu`.
 - Cadastros: `/usuarios`, `/perfis`, `/colaboradores`, `/conveniados`, `/beneficios`.

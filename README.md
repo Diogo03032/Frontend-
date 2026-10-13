@@ -2,6 +2,8 @@
 
 Portal da Fundação Cristiano Varella em React, TypeScript, Vite e CSS convencional. O repositório recebido continha somente o README; por isso esta entrega inclui a base de login, visão geral e conveniados, além das seis páginas solicitadas.
 
+Este repositório é exclusivo do **frontend web**. O backend é mantido separadamente em [joaovictorcascardo/fcv-backend](https://github.com/joaovictorcascardo/fcv-backend), responsável pela API, autenticação, regras do servidor e acesso ao MySQL com Knex. O portal consome essa API por HTTP; os dois projetos são executados e versionados separadamente.
+
 ## As seis páginas adicionadas
 
 - **Colaboradores** (`/colaboradores`): pesquisa, filtros, paginação, cadastro, detalhes, edição e inativação, com vínculo a uma conta de colaborador.
@@ -26,7 +28,7 @@ Abra o endereço exibido no terminal (por padrão `http://127.0.0.1:5173`). Na t
 
 ## Conectar à API real
 
-Copie `.env.example` para `.env.local` e configure `VITE_API_URL`, por exemplo `http://localhost:3333/api/v1`. Reinicie o servidor Vite após alterar variáveis.
+Execute o serviço do repositório `fcv-backend` em seu próprio ambiente, seguindo o README dele. Neste frontend, copie `.env.example` para `.env.local` e configure `VITE_API_URL` com o endereço desse serviço, por exemplo `http://localhost:3333/api/v1`. Reinicie o servidor Vite após alterar variáveis.
 
 O botão Entrar envia e-mail/senha a `/auth/login`. O portal aceita somente usuário ativo com escopo FCV; usa Bearer JWT nas requisições, guarda a sessão em `sessionStorage`, restaura via `/auth/eu` e limpa a sessão ao receber 401. Logout apaga o token. Nunca copie `JWT_SEGREDO`, senha do MySQL ou outra credencial do servidor para uma variável `VITE_*`.
 
