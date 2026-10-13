@@ -1,1 +1,57 @@
-# Frontend-
+# Portal de benefícios FCV - Grupo 3
+
+Portal da Fundação Cristiano Varella em React, TypeScript, Vite e CSS convencional. O repositório recebido continha somente o README; por isso esta entrega inclui a base de login, visão geral e conveniados, além das seis páginas solicitadas.
+
+## As seis páginas adicionadas
+
+- **Colaboradores** (`/colaboradores`): pesquisa, filtros, paginação, cadastro, detalhes, edição e inativação, com vínculo a uma conta de colaborador.
+- **Benefícios e ofertas** (`/beneficios`): cadastro, regras de ciclo/janela, edição, descontinuação e vínculos ativos/inativos com conveniados.
+- **Utilizações** (`/utilizacoes`): filtros completos, detalhes e estorno de aprovação com motivo obrigatório. O registro continua no histórico.
+- **Campanhas e eventos** (`/campanhas`): criação, edição, cancelamento, itens promocionais e conveniados vinculados.
+- **Relatórios** (`/relatorios`): períodos, comparação, rankings, adesão, sazonalidade e exportação de utilizações em CSV.
+- **Perfis e usuários** (`/perfis`): consulta, criação, edição e inativação de contas/perfis, com acesso exclusivo do administrador FCV.
+
+Telas de base: Login (`/login`), Visão geral (`/`) e Conveniados (`/conveniados`). Não há Tailwind ou Prisma neste front-end; a API existente permanece com Knex e MySQL.
+
+## Executar localmente
+
+Requer Node.js 22.12 ou mais recente e npm.
+
+```bash
+npm ci
+npm run dev
+```
+
+Abra o endereço exibido no terminal (por padrão `http://127.0.0.1:5173`). Na tela de login, **Explorar demonstração** permite usar dados fictícios como administrador ou operador, sem conectar ao MySQL. As alterações de demonstração são persistidas neste navegador; o botão de restaurar dados remove essas alterações.
+
+## Conectar à API real
+
+Copie `.env.example` para `.env.local` e configure `VITE_API_URL`, por exemplo `http://localhost:3333/api/v1`. Reinicie o servidor Vite após alterar variáveis.
+
+O botão Entrar envia e-mail/senha a `/auth/login`. O portal aceita somente usuário ativo com escopo FCV; usa Bearer JWT nas requisições, guarda a sessão em `sessionStorage`, restaura via `/auth/eu` e limpa a sessão ao receber 401. Logout apaga o token. Nunca copie `JWT_SEGREDO`, senha do MySQL ou outra credencial do servidor para uma variável `VITE_*`.
+
+Os modos API e demonstração são separados: a demonstração não cria token, não grava na API e não simula um login real. Em produção, a demonstração fica desabilitada por padrão; `VITE_ENABLE_DEMO=true` a habilita explicitamente para uma apresentação.
+
+A integração usa os endpoints e campos da cópia do backend analisada. A homologação com o serviço real depende do ambiente/aviso do Grupo 2. Veja [integração e limites](docs/INTEGRACAO.md).
+
+## Organização MVVM
+
+- `src/pages/` e `src/components/`: View, incluindo formulários e navegação.
+- `src/viewmodels/`: sessão, estado compartilhado, carregamento e comandos de persistência.
+- `src/models/`: contratos de dados, seletores e cálculos puros de indicadores.
+- `src/services/`: comunicação REST com a API central.
+- `src/styles/portal.css`: paleta, componentes, estados e layout responsivo em CSS.
+
+O portal reutiliza os mesmos componentes de campos, tabelas, modal nativo com foco/teclado, indicadores, status, pesquisa e paginação. A marca vetorial é uma aproximação da referência visual; os assets institucionais oficiais podem substituí-la sem reorganizar as telas.
+
+## Verificações
+
+```bash
+npm test
+npm run build
+npm run preview
+```
+
+Os testes de domínio cobrem relatórios por data/status, estornos, vínculos regulares/promocionais, restrição de administrador, filtro de período e integridade dos dados de exemplo. A entrega também foi verificada em Chromium: navegação, formulários, estorno, exportação, permissões, sessão e layout de 390 px/1366 px. A API utilizada na verificação de contrato foi interceptada; isso não é uma validação do MySQL.
+
+Referências consideradas: WEB.pdf, MOBILE.pdf, documento de arquitetura, requisitos do Grupo 2 e atribuições dos grupos. A instrução atual do usuário é o desenvolvimento das seis telas web do Grupo 3; o documento de atribuições recebido também descreve uma fase anterior de banco de dados. CSS e Knex são as escolhas confirmadas pelo usuário.
