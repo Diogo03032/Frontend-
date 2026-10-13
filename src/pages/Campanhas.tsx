@@ -8,7 +8,6 @@ import {
   Megaphone,
   Pencil,
   Plus,
-  Ticket,
   Users,
 } from "lucide-react";
 import { usePortal } from "../viewmodels/PortalContext";
@@ -21,6 +20,7 @@ import {
 import {
   Badge,
   DetailList,
+  DataTable,
   EmptyState,
   Field,
   Modal,
@@ -62,7 +62,7 @@ const PAGE_SIZE = 6;
 
 export default function Campanhas() {
   const { data, save, notify } = usePortal();
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(() => new URLSearchParams(window.location.search).get("buscar") ?? "");
   const [tipo, setTipo] = useState("");
   const [status, setStatus] = useState("");
   const [inicio, setInicio] = useState("");
@@ -274,6 +274,13 @@ export default function Campanhas() {
     );
   }
 
+  const initiativeColumns = [
+    {key:"name",label:"Título",render:(item:Campanha) => <div><strong className="cell-title">{item.nome}</strong><p className="cell-subtitle">{item.descricao || TIPOS[item.tipo]}</p></div>},
+    {key:"period",label:"Período",render:(item:Campanha) => <span>{formatDate(item.data_inicio)} a {formatDate(item.data_fim)}</span>},
+    {key:"benefits",label:"Benefícios",render:(item:Campanha) => data.itensCampanha.filter(benefit=>benefit.campanha_id===item.id).length},
+    {key:"status",label:"Status",render:(item:Campanha) => <Badge status={item.status}/>},
+    {key:"actions",label:"Ações",render:(item:Campanha) => <div className="table-actions"><button className="icon-button" aria-label={`Ver detalhes de ${item.nome}`} onClick={()=>setSelectedId(item.id)}><Eye size={16}/></button><button className="icon-button" aria-label={`Editar ${item.nome}`} onClick={()=>abrirForm(item)}><Pencil size={16}/></button>{!["CANCELADA","ENCERRADA"].includes(item.status) && <button className="icon-button danger" aria-label={`Cancelar ${item.nome}`} onClick={()=>setCancelTarget(item)}><CircleX size={16}/></button>}</div>},
+  ];
   return (
     <>
       <PageHeader
@@ -403,96 +410,17 @@ export default function Campanhas() {
             selecionadas.
           </p>
         </div>
-        {visibleRows.length ? (
-          <div className="campaign-grid">
-            {visibleRows.map((item) => {
-              const itens = data.itensCampanha.filter(
-                (beneficio) => beneficio.campanha_id === item.id,
-              );
-              return (
-                <article className="campaign-card" key={item.id}>
-                  <div className="campaign-heading">
-                    <span
-                      className={`campaign-icon ${item.tipo.startsWith("EVENTO") ? "green" : "blue"}`}
-                    >
-                      {item.tipo.startsWith("EVENTO") ? (
-                        <CalendarDays size={24} />
-                      ) : item.tipo === "VOUCHER" ||
-                        item.tipo === "CORTESIA" ? (
-                        <Ticket size={24} />
-                      ) : (
-                        <Megaphone size={24} />
-                      )}
-                    </span>
-                    <Badge status={item.status} />
-                  </div>
-                  <span className="campaign-type">
-                    {TIPOS[item.tipo as keyof typeof TIPOS]}
-                  </span>
-                  <h3>{item.nome}</h3>
-                  <p className="campaign-description">
-                    {item.descricao || "Sem descrição cadastrada."}
-                  </p>
-                  <div className="campaign-meta">
-                    <CalendarDays size={15} />
-                    <span>
-                      {formatDate(item.data_inicio)} a{" "}
-                      {formatDate(item.data_fim)}
-                    </span>
-                  </div>
-                  <div className="campaign-meta">
-                    <Gift size={15} />
-                    <span>
-                      {itens.length}{" "}
-                      {itens.length === 1
-                        ? "item promocional"
-                        : "itens promocionais"}
-                    </span>
-                  </div>
-                  <div className="campaign-footer">
-                    <button
-                      className="btn btn-secondary btn-small"
-                      onClick={() => setSelectedId(item.id)}
-                    >
-                      <Eye size={15} /> Ver detalhes
-                    </button>
-                    <div className="table-actions">
-                      <button
-                        className="icon-button"
-                        aria-label={`Editar ${item.nome}`}
-                        title="Editar"
-                        onClick={() => abrirForm(item)}
-                      >
-                        <Pencil size={16} />
-                      </button>
-                      {item.status !== "CANCELADA" &&
-                        item.status !== "ENCERRADA" && (
-                          <button
-                            className="icon-button danger"
-                            aria-label={`Cancelar ${item.nome}`}
-                            title="Cancelar campanha ou evento"
-                            onClick={() => setCancelTarget(item)}
-                          >
-                            <CircleX size={16} />
-                          </button>
-                        )}
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        ) : (
-          <EmptyState
-            title="Nenhuma iniciativa encontrada"
-            description="Ajuste os filtros ou cadastre uma nova campanha ou evento."
-            action={
-              <button className="btn btn-primary" onClick={() => abrirForm()}>
-                <Plus size={16} /> Nova iniciativa
-              </button>
-            }
-          />
-        )}
+        <div className="campaign-overview">
+          <section className="panel"><div className="panel-header"><h2><Megaphone size={20}/> Campanhas</h2></div><DataTable rows={visibleRows.filter(item=>!item.tipo.startsWith("EVENTO"))} columns={initiativeColumns} getRowKey={item=>item.id}/></section>
+          <section className="panel"><div className="panel-header"><h2><CalendarDays size={20}/> Eventos</h2></div><DataTable rows={visibleRows.filter(item=>item.tipo.startsWith("EVENTO"))} columns={initiativeColumns} getRowKey={item=>item.id}/></section>
+          <section className="panel promotional-table"><div className="panel-header"><h2><Gift size={20}/> Benefícios promocionais</h2></div><DataTable rows={data.itensCampanha.filter(item=>rows.some(campanha=>campanha.id===item.campanha_id))} columns={[
+            {key:"name",label:"Benefício",render:item=><strong className="cell-title">{item.nome}</strong>},
+            {key:"campaign",label:"Campanha / evento",render:item=>data.campanhas.find(campanha=>campanha.id===item.campanha_id)?.nome},
+            {key:"value",label:"Desconto / condição",render:item=>item.tipo_beneficio==="PERCENTUAL" ? `${Number(item.valor)}%` : formatMoney(item.valor)},
+            {key:"status",label:"Status",render:item=><Badge status={item.status}/>},
+            {key:"actions",label:"Ações",render:item=><button className="icon-button" aria-label={`Gerenciar ${item.nome}`} onClick={()=>setSelectedId(item.campanha_id)}><Eye size={16}/></button>},
+          ]} getRowKey={item=>item.id}/></section>
+        </div>
         <Pagination
           page={currentPage}
           total={rows.length}

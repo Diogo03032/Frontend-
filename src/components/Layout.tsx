@@ -1,4 +1,4 @@
-import { NavLink, Outlet, Link } from "react-router-dom";
+import { NavLink, Outlet, Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   Users,
@@ -10,10 +10,9 @@ import {
   ShieldCheck,
   LogOut,
   HelpCircle,
-  ArrowUpRight,
   Menu,
+  Bell,
   X,
-  RotateCcw,
   CheckCircle2,
   AlertCircle,
 } from "lucide-react";
@@ -22,19 +21,21 @@ import { useAuth } from "../viewmodels/AuthContext";
 import { usePortal } from "../viewmodels/PortalContext";
 import { initials, isAdministrador } from "../models/selectors";
 import Brand from "./Brand";
+import PortalSearch from "./PortalSearch";
 const navigation = [
-  { to: "/", label: "Visão geral", icon: LayoutDashboard },
+  { to: "/", label: "Dashboard", icon: LayoutDashboard },
   { to: "/colaboradores", label: "Colaboradores", icon: Users },
-  { to: "/beneficios", label: "Benefícios e ofertas", icon: Gift },
+  { to: "/beneficios", label: "Benefícios", icon: Gift },
   { to: "/conveniados", label: "Conveniados", icon: Handshake },
   { to: "/utilizacoes", label: "Utilizações", icon: ClipboardList },
   { to: "/campanhas", label: "Campanhas e eventos", icon: Megaphone },
   { to: "/relatorios", label: "Relatórios", icon: ChartNoAxesCombined },
-  { to: "/perfis", label: "Perfis e usuários", icon: ShieldCheck },
+  { to: "/perfis", label: "Configurações", icon: ShieldCheck },
 ];
 export default function Layout() {
-  const { user, logout, mode } = useAuth();
-  const { loading, error, reload, toast, resetDemo, data } = usePortal();
+  const { user, logout } = useAuth();
+  const location = useLocation();
+  const { loading, error, reload, toast, data } = usePortal();
   const [open, setOpen] = useState(false),
     [help, setHelp] = useState(false);
   const admin = isAdministrador(user!, data);
@@ -54,7 +55,7 @@ export default function Layout() {
         <Link to="/" className="brand-link" onClick={() => setOpen(false)}>
           <Brand compact />
         </Link>
-        <div className="workspace-label">PLATAFORMA DE BENEFÍCIOS</div>
+        <div className="workspace-label">Gestão</div>
         <nav className="main-navigation" aria-label="Menu principal">
           {navigation
             .filter((item) => item.to !== "/perfis" || admin)
@@ -82,16 +83,7 @@ export default function Layout() {
             ))}
         </nav>
         <div className="sidebar-bottom">
-          <div className="sidebar-support">
-            <div className="support-icon">
-              <HelpCircle size={20} />
-            </div>
-            <strong>Um cuidado que conecta.</strong>
-            <p>Benefícios que fazem diferença na vida de quem cuida.</p>
-            <button type="button" onClick={() => setHelp(!help)}>
-              Sobre o portal <ArrowUpRight size={15} />
-            </button>
-          </div>
+          <button className="sidebar-help" type="button" onClick={() => setHelp(!help)}><HelpCircle size={20} />Ajuda</button>
           <div className="sidebar-user">
             <span className="avatar">{initials(user!.nome)}</span>
             <div>
@@ -118,52 +110,15 @@ export default function Layout() {
             >
               {open ? <X /> : <Menu />}
             </button>
-            <span className="breadcrumb">
-              Fundação FCV <span>/</span> <strong>Portal de gestão</strong>
-            </span>
+            <PortalSearch />
           </div>
           <div className="topbar-right">
-            {mode === "demo" ? (
-              <>
-                <span className="mode-indicator">
-                  <span />
-                  Demonstração
-                </span>
-                <button
-                  className="icon-button"
-                  aria-label="Restaurar dados de demonstração"
-                  title="Restaurar dados de demonstração"
-                  onClick={() => {
-                    if (
-                      window.confirm(
-                        "Restaurar os dados de exemplo? Suas alterações de demonstração serão removidas.",
-                      )
-                    )
-                      resetDemo();
-                  }}
-                >
-                  <RotateCcw size={17} />
-                </button>
-              </>
-            ) : (
-              <span className="mode-indicator connected">
-                <span />
-                Conectado à API
-              </span>
-            )}
+            <Link className="notification-link" to="/utilizacoes?status=PENDENTE" aria-label="Ver utilizações pendentes"><Bell size={22} />{data.utilizacoes.some(item => item.status === "PENDENTE") && <span className="notification-dot" />}</Link>
             <span className="avatar small">{initials(user!.nome)}</span>
+            <div className="topbar-identity"><strong>{user!.nome}</strong><small>{admin ? "Administrador" : "Operador"}</small></div>
           </div>
         </header>
         <main id="main" className="page-content" tabIndex={-1}>
-          {mode === "demo" && (
-            <div className="demo-banner">
-              <span className="demo-dot" />
-              <span>
-                Esta é uma demonstração interativa. Os dados são fictícios e as
-                alterações ficam neste navegador.
-              </span>
-            </div>
-          )}
           {help && (
             <section className="inline-notice">
               <h2>Sobre o portal FCV</h2>
@@ -193,7 +148,7 @@ export default function Layout() {
               </button>
             </div>
           ) : (
-            <Outlet />
+            <Outlet key={location.pathname + location.search} />
           )}
           <footer className="page-footer">
             <span>Fundação Cristiano Varella · Pela vida.</span>

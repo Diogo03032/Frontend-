@@ -34,7 +34,7 @@ Adesão observada por benefício usa colaboradores atualmente ativos com uso apr
 
 Frontend: somente FCV ativo, Bearer JWT, sessão no `sessionStorage`, consulta `/auth/eu`, saída em 401 e logout. Não há refresh porque o backend analisado não o fornece. A recuperação de senha que devolve o código na resposta não foi apresentada como fluxo definitivo na interface.
 
-Para um ambiente publicado, usar HTTPS, origens CORS adequadas e validação de permissões no servidor. Credenciais de banco/JWT permanecem exclusivamente no backend com Knex. Nenhuma migration, seed ou configuração de banco foi alterada nesta entrega.
+Para um ambiente publicado, usar HTTPS, origens CORS adequadas e validação de permissões no servidor. Credenciais de banco/JWT permanecem exclusivamente no backend com Knex. Para a execução local, foi configurada uma instância MySQL separada e executadas as migrations e seeds existentes, sem alterar seu código. Dados e credenciais locais não pertencem a este repositório.
 
 ## Escopo visual
 
@@ -44,4 +44,6 @@ Auditoria geral RF38 e PDF de exportação RF36 não foram implementados. São C
 
 ## Verificação real versus simulada
 
-A compilação e os testes de seletores foram executados. Os testes do navegador usaram a aplicação real em modo de demonstração para navegação/cadastro/estorno/CSV, e respostas REST interceptadas para verificar o contrato, Bearer token, restauração e expiração da sessão. O login e o banco MySQL real ainda precisam de homologação com o ambiente do Grupo 2.
+A versão atual usa exclusivamente a API. A compilação e os testes de seletores foram executados. A verificação do navegador com o backend e MySQL locais inclui login, senha incorreta, as dez listas autenticadas, restauração por `/auth/eu`, token inválido, logout, restrição de administrador, busca e edição de benefício persistida no banco. O valor editado foi restaurado ao final. Essa verificação não intercepta requisições e não substitui a homologação do ambiente publicado pelo Grupo 2.
+
+O login, a marca, a fotografia e os componentes visuais seguem o WEB.pdf fornecido. A foto preserva sua proporção completa e não é ampliada acima da resolução original do PDF. Telas de até 800 px priorizam o formulário sem foto lateral. Busca e aviso de utilizações pendentes usam registros recebidos da API; não há notificações ou trilha de auditoria inventadas.

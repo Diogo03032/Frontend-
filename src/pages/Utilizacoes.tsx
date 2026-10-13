@@ -34,8 +34,8 @@ const PAGE_SIZE = 8;
 
 export default function Utilizacoes() {
   const { data, save, notify } = usePortal();
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("");
+  const [search, setSearch] = useState(() => new URLSearchParams(window.location.search).get("buscar") ?? "");
+  const [status, setStatus] = useState(() => new URLSearchParams(window.location.search).get("status") ?? "");
   const [inicio, setInicio] = useState("");
   const [fim, setFim] = useState("");
   const [colaborador, setColaborador] = useState("");

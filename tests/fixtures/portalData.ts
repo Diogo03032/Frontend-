@@ -1,10 +1,10 @@
-import type { PortalData } from "./types";
+import type { PortalData } from "../../src/models/types";
 const date = (offset: number) => {
   const d = new Date();
   d.setDate(d.getDate() + offset);
   return d.toISOString().slice(0, 10);
 };
-export function createDemoData(): PortalData {
+export function createFixtureData(): PortalData {
   const nomes = [
     "Ana Carolina Silva",
     "João Pedro Santos",

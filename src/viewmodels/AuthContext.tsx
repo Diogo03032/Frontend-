@@ -7,25 +7,19 @@ import {
 } from "react";
 import type { SessionUser } from "../models/types";
 import { getCurrentUser, hasToken, loginApi, setToken } from "../services/api";
-export const demoEnabled =
-  import.meta.env.DEV || import.meta.env.VITE_ENABLE_DEMO === "true";
 interface Auth {
   user: SessionUser | null;
-  mode: "demo" | "api";
   restoring: boolean;
   login: (email: string, senha: string) => Promise<void>;
-  demo: (role?: "admin" | "operador") => void;
   logout: () => void;
 }
 const Context = createContext<Auth | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<SessionUser | null>(null),
-    [mode, setMode] = useState<"demo" | "api">("api"),
     [restoring, setRestoring] = useState(hasToken());
   function logout() {
     setToken(null);
     setUser(null);
-    setMode("api");
   }
   useEffect(() => {
     let active = true;
@@ -49,25 +43,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
   async function login(email: string, senha: string) {
     const u = await loginApi(email, senha);
-    setMode("api");
     setUser(u);
   }
-  function demo(role: "admin" | "operador" = "admin") {
-    if (!demoEnabled) return;
-    setToken(null);
-    setMode("demo");
-    setUser({
-      id: role === "admin" ? 1 : 2,
-      nome: role === "admin" ? "Ana Beatriz Santos" : "Bruno Operador",
-      email: role === "admin" ? "admin@fcv.org.br" : "operador@fcv.org.br",
-      perfil_id: role === "admin" ? 1 : 2,
-      perfil: role === "admin" ? "FCV_ADMINISTRADOR" : "FCV_OPERADOR",
-      status: "ATIVO",
-      escopo: "FCV",
-    });
-  }
   return (
-    <Context.Provider value={{ user, mode, restoring, login, demo, logout }}>
+    <Context.Provider value={{ user, restoring, login, logout }}>
       {children}
     </Context.Provider>
   );

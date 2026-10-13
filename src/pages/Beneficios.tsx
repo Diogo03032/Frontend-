@@ -79,7 +79,7 @@ function valueSummary(item: Beneficio) {
 
 export default function Beneficios() {
   const { data, save, notify, loading } = usePortal();
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(() => new URLSearchParams(window.location.search).get("buscar") ?? "");
   const [status, setStatus] = useState("");
   const [windowType, setWindowType] = useState("");
   const [page, setPage] = useState(1);

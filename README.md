@@ -24,7 +24,7 @@ npm ci
 npm run dev
 ```
 
-Abra o endereço exibido no terminal (por padrão `http://127.0.0.1:5173`). Na tela de login, **Explorar demonstração** permite usar dados fictícios como administrador ou operador, sem conectar ao MySQL. As alterações de demonstração são persistidas neste navegador; o botão de restaurar dados remove essas alterações.
+Abra o endereço exibido no terminal (por padrão `http://127.0.0.1:5173`). O backend deve estar em execução para entrar e carregar os dados. O portal usa exclusivamente a API real, sem modo de demonstração ou armazenamento local de cadastros.
 
 ## Conectar à API real
 
@@ -32,9 +32,9 @@ Execute o serviço do repositório `fcv-backend` em seu próprio ambiente, segui
 
 O botão Entrar envia e-mail/senha a `/auth/login`. O portal aceita somente usuário ativo com escopo FCV; usa Bearer JWT nas requisições, guarda a sessão em `sessionStorage`, restaura via `/auth/eu` e limpa a sessão ao receber 401. Logout apaga o token. Nunca copie `JWT_SEGREDO`, senha do MySQL ou outra credencial do servidor para uma variável `VITE_*`.
 
-Os modos API e demonstração são separados: a demonstração não cria token, não grava na API e não simula um login real. Em produção, a demonstração fica desabilitada por padrão; `VITE_ENABLE_DEMO=true` a habilita explicitamente para uma apresentação.
+As seeds de desenvolvimento do backend disponibilizam `admin@fcv.org.br` e `operador@fcv.org.br`, com senha `123456`. São contas locais de teste; configure contas próprias antes de publicar o ambiente. O login aceita e-mail, conforme o contrato atual da API.
 
-A integração usa os endpoints e campos da cópia do backend analisada. A homologação com o serviço real depende do ambiente/aviso do Grupo 2. Veja [integração e limites](docs/INTEGRACAO.md).
+A integração foi verificada com o backend e MySQL locais, incluindo autenticação, consultas e edição persistida. Veja [integração e limites](docs/INTEGRACAO.md).
 
 ## Organização MVVM
 
@@ -42,9 +42,9 @@ A integração usa os endpoints e campos da cópia do backend analisada. A homol
 - `src/viewmodels/`: sessão, estado compartilhado, carregamento e comandos de persistência.
 - `src/models/`: contratos de dados, seletores e cálculos puros de indicadores.
 - `src/services/`: comunicação REST com a API central.
-- `src/styles/portal.css`: paleta, componentes, estados e layout responsivo em CSS.
+- `src/styles/portal.css` e `reference.css`: componentes, identidade da referência e layout responsivo em CSS.
 
-O portal reutiliza os mesmos componentes de campos, tabelas, modal nativo com foco/teclado, indicadores, status, pesquisa e paginação. A marca vetorial é uma aproximação da referência visual; os assets institucionais oficiais podem substituí-la sem reorganizar as telas.
+O portal reutiliza componentes de campos, tabelas, modal nativo com foco/teclado, indicadores, status, pesquisa e paginação. Marca e fotografia foram extraídas do WEB.pdf fornecido, em WebP. As imagens preservam a proporção e têm limites de tamanho; a fotografia lateral é ocultada em telas de até 800 px. A resolução disponível é a do PDF: arquivos institucionais originais podem melhorar a nitidez em telas de alta densidade.
 
 ## Verificações
 
@@ -54,6 +54,8 @@ npm run build
 npm run preview
 ```
 
-Os testes de domínio cobrem relatórios por data/status, estornos, vínculos regulares/promocionais, restrição de administrador, filtro de período e integridade dos dados de exemplo. A entrega também foi verificada em Chromium: navegação, formulários, estorno, exportação, permissões, sessão e layout de 390 px/1366 px. A API utilizada na verificação de contrato foi interceptada; isso não é uma validação do MySQL.
+Os testes de domínio cobrem relatórios por data/status, estornos, vínculos regulares/promocionais, restrição de administrador, filtro de período e integridade das fixtures de teste. Essas fixtures ficam exclusivamente em `tests/`.
+
+A verificação em Chromium usa o backend e MySQL reais: login, senha incorreta, restauração de sessão, rejeição de token inválido, logout, restrição do operador, busca e edição de benefício persistida no banco, com restauração do valor original. As oito telas internas foram conferidas em 320, 390, 768, 1024 e 1440 px. O login foi conferido também em 1920 px. Não foram usadas respostas de API interceptadas nessa verificação.
 
 Referências consideradas: WEB.pdf, MOBILE.pdf, documento de arquitetura, requisitos do Grupo 2 e atribuições dos grupos. A instrução atual do usuário é o desenvolvimento das seis telas web do Grupo 3; o documento de atribuições recebido também descreve uma fase anterior de banco de dados. CSS e Knex são as escolhas confirmadas pelo usuário.

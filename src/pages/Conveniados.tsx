@@ -46,7 +46,7 @@ const blankForm = (): ConveniadoForm => ({
 
 export default function Conveniados() {
   const { data, save, notify, loading } = usePortal();
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(() => new URLSearchParams(window.location.search).get("buscar") ?? "");
   const [status, setStatus] = useState("");
   const [category, setCategory] = useState("");
   const [page, setPage] = useState(1);

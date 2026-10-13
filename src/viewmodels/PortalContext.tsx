@@ -7,11 +7,9 @@ import {
   type ReactNode,
 } from "react";
 import type { PortalData, Resource, Entity } from "../models/types";
-import { createDemoData } from "../models/demoData";
 import { isAdministrador } from "../models/selectors";
 import { listResource, saveResource } from "../services/api";
 import { useAuth } from "./AuthContext";
-const key = "fcv.portal.demo.v1";
 const empty: PortalData = {
   usuarios: [],
   perfis: [],
@@ -27,7 +25,6 @@ const empty: PortalData = {
 type Toast = { message: string; type: "success" | "error" | "info" };
 interface Portal {
   data: PortalData;
-  mode: "demo" | "api";
   loading: boolean;
   error: string | null;
   toast: Toast | null;
@@ -38,11 +35,10 @@ interface Portal {
     id: number | undefined,
     payload: Partial<Entity<K>>,
   ) => Promise<Entity<K>>;
-  resetDemo: () => void;
 }
 const Context = createContext<Portal | null>(null);
 export function PortalProvider({ children }: { children: ReactNode }) {
-  const { mode, user } = useAuth();
+  const { user } = useAuth();
   const [data, setData] = useState<PortalData>(empty),
     [loading, setLoading] = useState(true),
     [error, setError] = useState<string | null>(null),
@@ -60,23 +56,6 @@ export function PortalProvider({ children }: { children: ReactNode }) {
     const current = ++generation.current;
     setLoading(true);
     setError(null);
-    if (mode === "demo") {
-      let value: PortalData;
-      try {
-        const saved = localStorage.getItem(key);
-        const parsed = saved ? JSON.parse(saved) : null;
-        value =
-          parsed && Object.keys(empty).every((k) => Array.isArray(parsed[k]))
-            ? parsed
-            : createDemoData();
-      } catch {
-        value = createDemoData();
-      }
-      setData(value);
-      dataRef.current = value;
-      setLoading(false);
-      return;
-    }
     const resources = Object.keys(empty) as Resource[];
     try {
       const results = await Promise.all(resources.map((r) => listResource(r)));
@@ -99,7 +78,7 @@ export function PortalProvider({ children }: { children: ReactNode }) {
       generation.current++;
       if (noticeTimer.current) clearTimeout(noticeTimer.current);
     };
-  }, [mode, user?.id]);
+  }, [user?.id]);
   async function save<K extends Resource>(
     resource: K,
     id: number | undefined,
@@ -130,20 +109,7 @@ export function PortalProvider({ children }: { children: ReactNode }) {
       )
         throw new Error("O histórico de utilização não pode ser editado.");
     }
-    let result: Entity<K>;
-    if (mode === "api") {
-      result = await saveResource(resource, id, payload);
-    } else {
-      const sanitized = { ...payload } as Record<string, unknown>;
-      delete sanitized.senha;
-      const previous = dataRef.current[resource].find((item) => item.id === id);
-      if (id !== undefined && !previous)
-        throw new Error("Registro não encontrado.");
-      const nextId =
-        id ??
-        Math.max(0, ...dataRef.current[resource].map((item) => item.id)) + 1;
-      result = { ...previous, ...sanitized, id: nextId } as Entity<K>;
-    }
+    const result = await saveResource(resource, id, payload);
     const currentData = dataRef.current;
     const rows = currentData[resource] as Entity<K>[];
     const next = {
@@ -155,38 +121,18 @@ export function PortalProvider({ children }: { children: ReactNode }) {
     } as PortalData;
     dataRef.current = next;
     setData(next);
-    if (mode === "demo") {
-      try {
-        localStorage.setItem(key, JSON.stringify(next));
-      } catch {
-        notify(
-          "A alteração está nesta sessão; não foi possível salvar a demonstração no navegador.",
-          "info",
-        );
-      }
-    }
     return result;
-  }
-  function resetDemo() {
-    if (mode !== "demo") return;
-    localStorage.removeItem(key);
-    const next = createDemoData();
-    setData(next);
-    dataRef.current = next;
-    notify("Dados de demonstração restaurados.");
   }
   return (
     <Context.Provider
       value={{
         data,
-        mode,
         loading,
         error,
         toast,
         notify,
         reload,
         save,
-        resetDemo,
       }}
     >
       {children}

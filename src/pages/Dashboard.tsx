@@ -1,3 +1,4 @@
+import { buildReport } from "../models/reportSelectors";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -7,7 +8,6 @@ import {
   ClipboardCheck,
   ArrowUpRight,
   CalendarDays,
-  HeartHandshake,
 } from "lucide-react";
 import { PageHeader, StatCard, Badge } from "../components/ui";
 import { usePortal } from "../viewmodels/PortalContext";
@@ -17,29 +17,29 @@ import {
   colaboradorNome,
   conveniadoDaUtilizacao,
   formatDate,
-  formatMoney,
   withinPeriod,
 } from "../models/selectors";
 export default function Dashboard() {
   const { data } = usePortal();
   const { user } = useAuth();
-  const [days, setDays] = useState(90);
+  const [days, setDays] = useState(30);
   const usages = data.utilizacoes.filter((u) =>
     withinPeriod(u.data_solicitacao, days),
   );
   const approved = usages.filter((u) => u.status === "APROVADA");
-  const total = approved.reduce((sum, u) => sum + Number(u.valor_aplicado), 0);
-  const byBenefit = data.beneficios
-    .map((b) => ({
-      name: b.nome,
-      count: approved.filter(
-        (u) =>
-          u.beneficio_conveniado_id &&
-          data.ofertas.find((o) => o.id === u.beneficio_conveniado_id)
-            ?.beneficio_id === b.id,
-      ).length,
-    }))
-    .sort((a, b) => b.count - a.count);
+  const today = new Date().toISOString().slice(0, 10);
+  const first = [...usages].map(item => item.data_solicitacao.slice(0,10)).sort()[0] || today;
+  const report = buildReport({...data, utilizacoes:usages}, first, today);
+  const byBenefit = report.benefits.map(item => ({name:item.nome, count:item.count}));
+  const least = [...byBenefit].sort((a,b) => a.count-b.count).slice(0,3);
+  const colors = ["#0874db", "#23b797", "#ffd150", "#a477df", "#ed6798", "#65bfea"];
+  let offset = 0;
+  const stops = report.categories.map((item,index) => {
+    const start = offset;
+    offset += approved.length ? item.count / approved.length * 100 : 0;
+    return `${colors[index % colors.length]} ${start}% ${offset}%`;
+  });
+  const donut = stops.length ? `conic-gradient(${stops.join(",")})` : "#e8f1f8";
   const maximum = Math.max(1, ...byBenefit.map((b) => b.count));
   const latest = [...usages]
     .sort((a, b) => b.data_solicitacao.localeCompare(a.data_solicitacao))
@@ -67,8 +67,8 @@ export default function Dashboard() {
   return (
     <>
       <PageHeader
-        title={`Olá, ${user!.nome.split(" ")[0]}!`}
-        description="Uma visão do cuidado que a Fundação transforma em benefícios."
+        title={`Olá, ${user!.nome.split(" ").slice(0,2).join(" ")}!`}
+        description="Aqui está um resumo das utilizações e dos benefícios da Fundação."
         actions={
           <label className="period-control">
             <CalendarDays size={17} />
@@ -87,17 +87,17 @@ export default function Dashboard() {
       />
       <div className="stats-grid">
         <StatCard
-          label="Utilizações aprovadas"
+          label="Total de utilizações"
           value={approved.length}
           icon={<ClipboardCheck />}
           detail="No período selecionado"
           tone="green"
         />
         <StatCard
-          label="Benefícios ativos"
-          value={data.beneficios.filter((b) => b.status === "ATIVO").length}
+          label="Benefícios utilizados"
+          value={byBenefit.filter(item => item.count > 0).length}
           icon={<Gift />}
-          detail="Cuidado em diferentes áreas"
+          detail="Com utilizações aprovadas no período"
           tone="purple"
         />
         <StatCard
@@ -107,10 +107,10 @@ export default function Dashboard() {
           detail="Pessoas com cadastro ativo"
         />
         <StatCard
-          label="Conveniados ativos"
-          value={data.conveniados.filter((c) => c.status === "ATIVO").length}
+          label="Benefícios pouco utilizados"
+          value={byBenefit.filter(item => item.count === 0).length}
           icon={<Handshake />}
-          detail="Parcerias que fazem diferença"
+          detail="Sem utilizações aprovadas no período"
           tone="amber"
         />
       </div>
@@ -179,7 +179,7 @@ export default function Dashboard() {
           <div className="panel-header">
             <div>
               <span className="eyebrow">PREFERÊNCIAS</span>
-              <h2>Benefícios mais utilizados</h2>
+              <h2>Utilizações por categoria</h2>
             </div>
             <Link
               to="/relatorios"
@@ -189,29 +189,18 @@ export default function Dashboard() {
               <ArrowUpRight size={19} />
             </Link>
           </div>
-          <div className="bar-chart">
-            {byBenefit.slice(0, 5).map((b, i) => (
-              <div className="bar-row" key={b.name}>
-                <div>
-                  <span className={`rank rank-${i}`}>{i + 1}</span>
-                  <span>{b.name}</span>
-                  <strong>{b.count}</strong>
-                </div>
-                <div className="bar-track">
-                  <div
-                    className={`bar-fill bar-color-${i % 4}`}
-                    style={{ width: `${(b.count / maximum) * 100}%` }}
-                  />
-                </div>
-              </div>
-            ))}
+          <div className="category-chart">
+            <div className="category-donut" style={{background:donut}} role="img" aria-label={`Distribuição de utilizações aprovadas: ${report.categories.map(item => `${item.nome}: ${item.count}`).join(", ") || "nenhuma utilização"}`}><div><strong>{approved.length}</strong><small>Total de utilizações</small></div></div>
+            <div className="category-legend">{report.categories.map((item,index) => <div key={item.nome}><i style={{background:colors[index % colors.length]}} /><span>{item.nome}</span><strong>{approved.length ? Math.round(item.count/approved.length*100) : 0}%</strong></div>)}</div>
           </div>
-          <p className="chart-caption">
-            Número de utilizações aprovadas no período selecionado
-          </p>
+          <p className="chart-caption">Categorias dos conveniados · Utilizações aprovadas no período</p>
+        </section>
+        <section className="panel"><div className="panel-header"><h2>Benefícios pouco utilizados</h2><Link className="button-link" to="/relatorios">Ver todos <ArrowUpRight size={15}/></Link></div><div className="least-benefits">{least.map((item,index) => <article key={item.name}><span className={`stat-icon ${index % 2 ? "green" : "purple"}`}><Gift size={22}/></span><div><strong>{item.name}</strong><small>{item.count} utilizações aprovadas</small><div className="bar-track"><div className={`bar-fill bar-color-${index}`} style={{width:`${item.count/maximum*100}%`}} /></div></div></article>)}</div>
         </section>
       </div>
       <div className="dashboard-bottom">
+        <section className="panel"><div className="panel-header"><h2>Parceiros mais utilizados</h2><Link className="button-link" to="/conveniados">Ver todos <ArrowUpRight size={15}/></Link></div><div className="bar-chart">{report.partners.slice(0,5).map((item,index) => <div className="bar-row" key={item.id}><div><span className={`rank rank-${index}`}>{index+1}</span><span>{item.nome}</span><strong>{item.count}</strong></div><div className="bar-track"><div className="bar-fill" style={{width:`${approved.length ? item.count/approved.length*100 : 0}%`}} /></div></div>)}</div></section>
+        <section className="panel"><div className="panel-header"><h2>Utilizações por tipo de benefício</h2></div><div className="benefit-columns">{byBenefit.slice(0,6).map((item,index) => <div key={item.name}><strong>{item.count}</strong><div style={{height:`${item.count/maximum*148}px`,background:colors[index % colors.length]}}/><small>{item.name}</small></div>)}</div><p className="chart-caption">Eixo vertical: utilizações aprovadas · Eixo horizontal: benefício</p></section>
         <section className="panel">
           <div className="panel-header">
             <div>
@@ -248,26 +237,7 @@ export default function Dashboard() {
             )}
           </div>
         </section>
-        <section className="care-card">
-          <HeartHandshake size={29} />
-          <span className="eyebrow">CUIDAR DE QUEM CUIDA</span>
-          <h2>
-            Pequenas parcerias.
-            <br />
-            Grandes possibilidades.
-          </h2>
-          <p>
-            Acompanhe as campanhas e amplie o alcance dos benefícios para nossos
-            colaboradores.
-          </p>
-          <div className="care-stat">
-            <strong>{formatMoney(total)}</strong>
-            <span>Valor aplicado nas utilizações aprovadas</span>
-          </div>
-          <Link to="/campanhas">
-            Conhecer campanhas <ArrowUpRight size={17} />
-          </Link>
-        </section>
+
       </div>
     </>
   );

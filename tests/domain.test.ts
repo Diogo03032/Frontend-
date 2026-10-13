@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createDemoData } from "../src/models/demoData";
+import { createFixtureData } from "./fixtures/portalData";
 import { buildReport } from "../src/models/reportSelectors";
 import {
   beneficioDaUtilizacao,
@@ -14,7 +14,7 @@ import {
 import type { PortalData, Utilizacao } from "../src/models/types";
 
 function fixture(): PortalData {
-  const data = createDemoData();
+  const data = createFixtureData();
   data.campanhas = [
     { ...data.campanhas[0], data_inicio: "2026-10-01", data_fim: "2026-10-13" },
   ];
@@ -187,7 +187,7 @@ test("apenas APROVADA admite estorno; os estados mantêm rótulos distintos", ()
 });
 
 test("operador e perfis do aplicativo não recebem acesso de administrador", () => {
-  const data = createDemoData();
+  const data = createFixtureData();
   assert.equal(isAdministrador({ perfil: "FCV_ADMINISTRADOR" }), true);
   assert.equal(isAdministrador({ perfil_id: 1 }, data), true);
   for (const perfil of [
@@ -219,8 +219,8 @@ test("filtro temporal aceita os limites e recusa datas futuras ou inválidas", (
   assert.equal(withinPeriod("2020-01-01T00:00:00", 0, now), true);
 });
 
-test("dados de demonstração têm IDs, chaves únicas e referências coerentes", () => {
-  const data = createDemoData();
+test("fixtures têm IDs, chaves únicas e referências coerentes", () => {
+  const data = createFixtureData();
   for (const [resource, rows] of Object.entries(data)) {
     assert.equal(
       new Set(rows.map((row: { id: number }) => row.id)).size,

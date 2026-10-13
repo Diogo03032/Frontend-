@@ -85,10 +85,10 @@ const permissionLabel = (permission: string) =>
 
 export default function Perfis() {
   const { user } = useAuth();
-  const { data, save, notify, loading, mode } = usePortal();
+  const { data, save, notify, loading } = usePortal();
   const admin = user !== null && isAdministrador(user, data);
   const [tab, setTab] = useState<"perfis" | "usuarios">("perfis");
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(() => new URLSearchParams(window.location.search).get("buscar") ?? "");
   const [status, setStatus] = useState("");
   const [scope, setScope] = useState("");
   const [page, setPage] = useState(1);
@@ -949,12 +949,6 @@ export default function Perfis() {
               <p className="full-width inline-notice">
                 Você está editando sua própria conta. Seu perfil e status ficam
                 protegidos durante esta sessão.
-              </p>
-            )}
-            {mode === "demo" && (
-              <p className="full-width text-muted">
-                As senhas digitadas na demonstração não são guardadas nem usadas
-                para login.
               </p>
             )}
             {formError && (
