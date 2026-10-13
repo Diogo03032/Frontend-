@@ -239,14 +239,20 @@ export function Modal({
   const id = useId();
   useEffect(() => {
     const dialog = ref.current;
+    const previousFocus = document.activeElement;
     dialog?.showModal();
-    return () => dialog?.close();
+    return () => {
+      dialog?.close();
+      if (previousFocus instanceof HTMLElement && previousFocus.isConnected)
+        previousFocus.focus();
+    };
   }, []);
   return (
     <dialog
       ref={ref}
       className={`modal ${wide ? "modal-wide" : ""}`}
       aria-labelledby={id}
+      aria-describedby={description ? `${id}-description` : undefined}
       onCancel={(e) => {
         e.preventDefault();
         onClose();
@@ -267,7 +273,7 @@ export function Modal({
       <div className="modal-header">
         <div>
           <h2 id={id}>{title}</h2>
-          {description && <p>{description}</p>}
+          {description && <p id={`${id}-description`}>{description}</p>}
         </div>
         <button
           className="icon-button"

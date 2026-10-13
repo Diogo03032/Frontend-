@@ -1,4 +1,5 @@
 import { useMemo, useState, type FormEvent } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   CheckCircle2,
   CircleDollarSign,
@@ -34,6 +35,7 @@ const PAGE_SIZE = 8;
 
 export default function Utilizacoes() {
   const { data, save, notify } = usePortal();
+  const navigate = useNavigate();
   const [search, setSearch] = useState(() => new URLSearchParams(window.location.search).get("buscar") ?? "");
   const [status, setStatus] = useState(() => new URLSearchParams(window.location.search).get("status") ?? "");
   const [inicio, setInicio] = useState("");
@@ -42,11 +44,23 @@ export default function Utilizacoes() {
   const [conveniado, setConveniado] = useState("");
   const [beneficio, setBeneficio] = useState("");
   const [page, setPage] = useState(1);
-  const [selected, setSelected] = useState<Utilizacao | null>(null);
+  const [selected, setSelected] = useState<Utilizacao | null>(() => {
+    const id = Number(new URLSearchParams(window.location.search).get("utilizacao"));
+    return data.utilizacoes.find(item => item.id === id) ?? null;
+  });
   const [reversal, setReversal] = useState<Utilizacao | null>(null);
   const [motivo, setMotivo] = useState("");
   const [saving, setSaving] = useState(false);
   const periodoInvalido = !!inicio && !!fim && fim < inicio;
+
+  function closeDetails() {
+    setSelected(null);
+    const params = new URLSearchParams(window.location.search);
+    if (params.has("utilizacao")) {
+      params.delete("utilizacao");
+      navigate({ pathname: "/utilizacoes", search: params.toString() }, { replace: true });
+    }
+  }
 
   const rows = useMemo(
     () =>
@@ -412,7 +426,7 @@ export default function Utilizacoes() {
         <Modal
           title={`Utilização #${String(selected.id).padStart(5, "0")}`}
           description="Dados registrados no histórico de resgates."
-          onClose={() => setSelected(null)}
+          onClose={closeDetails}
         >
           <div className="detail-status">
             <Badge status={selected.status} />
@@ -472,7 +486,7 @@ export default function Utilizacoes() {
           <div className="modal-footer">
             <button
               className="btn btn-secondary"
-              onClick={() => setSelected(null)}
+              onClick={closeDetails}
             >
               Fechar
             </button>

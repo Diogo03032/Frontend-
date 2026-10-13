@@ -11,7 +11,6 @@ import {
   LogOut,
   HelpCircle,
   Menu,
-  Bell,
   X,
   CheckCircle2,
   AlertCircle,
@@ -22,6 +21,7 @@ import { usePortal } from "../viewmodels/PortalContext";
 import { initials, isAdministrador } from "../models/selectors";
 import Brand from "./Brand";
 import PortalSearch from "./PortalSearch";
+import NotificationCenter from "./NotificationCenter";
 const navigation = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
   { to: "/colaboradores", label: "Colaboradores", icon: Users },
@@ -113,7 +113,7 @@ export default function Layout() {
             <PortalSearch />
           </div>
           <div className="topbar-right">
-            <Link className="notification-link" to="/utilizacoes?status=PENDENTE" aria-label="Ver utilizações pendentes"><Bell size={22} />{data.utilizacoes.some(item => item.status === "PENDENTE") && <span className="notification-dot" />}</Link>
+            <NotificationCenter />
             <span className="avatar small">{initials(user!.nome)}</span>
             <div className="topbar-identity"><strong>{user!.nome}</strong><small>{admin ? "Administrador" : "Operador"}</small></div>
           </div>

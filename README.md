@@ -42,9 +42,11 @@ A integração foi verificada com o backend e MySQL locais, incluindo autentica�
 - `src/viewmodels/`: sessão, estado compartilhado, carregamento e comandos de persistência.
 - `src/models/`: contratos de dados, seletores e cálculos puros de indicadores.
 - `src/services/`: comunicação REST com a API central.
-- `src/styles/portal.css` e `reference.css`: componentes, identidade da referência e layout responsivo em CSS.
+- `src/styles/`: componentes, identidade da referência, notificações, acabamento e layout responsivo em CSS.
 
 O portal reutiliza componentes de campos, tabelas, modal nativo com foco/teclado, indicadores, status, pesquisa e paginação. Marca e fotografia foram extraídas do WEB.pdf fornecido, em WebP. As imagens preservam a proporção e têm limites de tamanho; a fotografia lateral é ocultada em telas de até 800 px. A resolução disponível é a do PDF: arquivos institucionais originais podem melhorar a nitidez em telas de alta densidade.
+
+O sino no topo abre um modal com as utilizações pendentes, contador e atalhos para cada registro ou para a lista filtrada. O botão Atualizar consulta novamente a API; o contador representa pendências atuais. O acabamento visual e as animações de entrada/transições usam apenas CSS, sem novas dependências, respeitando `prefers-reduced-motion`.
 
 ## Verificações
 
@@ -57,5 +59,7 @@ npm run preview
 Os testes de domínio cobrem relatórios por data/status, estornos, vínculos regulares/promocionais, restrição de administrador, filtro de período e integridade das fixtures de teste. Essas fixtures ficam exclusivamente em `tests/`.
 
 A verificação em Chromium usa o backend e MySQL reais: login, senha incorreta, restauração de sessão, rejeição de token inválido, logout, restrição do operador, busca e edição de benefício persistida no banco, com restauração do valor original. As oito telas internas foram conferidas em 320, 390, 768, 1024 e 1440 px. O login foi conferido também em 1920 px. Não foram usadas respostas de API interceptadas nessa verificação.
+
+O modal de notificações foi verificado com pendências reais: contador, atualização, links, detalhe por ID exato, teclado e retorno do foco ao sino. Estados vazio e erro foram simulados apenas em sessões isoladas do navegador, sem alterar o banco. Também foram conferidos os layouts de desktop/celular e a desativação das animações com movimento reduzido.
 
 Referências consideradas: WEB.pdf, MOBILE.pdf, documento de arquitetura, requisitos do Grupo 2 e atribuições dos grupos. A instrução atual do usuário é o desenvolvimento das seis telas web do Grupo 3; o documento de atribuições recebido também descreve uma fase anterior de banco de dados. CSS e Knex são as escolhas confirmadas pelo usuário.
