@@ -15,6 +15,8 @@ Este repositório é exclusivo do **frontend web**. O backend é mantido separad
 
 Telas de base: Login (`/login`), Visão geral (`/`) e Conveniados (`/conveniados`). Não há Tailwind ou Prisma neste front-end; a API existente permanece com Knex e MySQL.
 
+O avatar no cabeçalho e na barra lateral abre **Meu perfil** (`/meu-perfil`), com nome, e-mail, perfil de acesso, status e data de criação da conta conectada, recebidos da API. A consulta está disponível para administrador e operador; a gestão de todas as contas continua restrita ao administrador em `/perfis`.
+
 ## Executar localmente
 
 Requer Node.js 22.12 ou mais recente e npm.

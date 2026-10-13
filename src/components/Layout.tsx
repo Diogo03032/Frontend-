@@ -85,11 +85,10 @@ export default function Layout() {
         <div className="sidebar-bottom">
           <button className="sidebar-help" type="button" onClick={() => setHelp(!help)}><HelpCircle size={20} />Ajuda</button>
           <div className="sidebar-user">
-            <span className="avatar">{initials(user!.nome)}</span>
-            <div>
-              <strong>{user!.nome}</strong>
-              <small>{admin ? "Administrador FCV" : "Operador FCV"}</small>
-            </div>
+            <Link to="/meu-perfil" className="sidebar-profile-link" aria-label="Abrir meu perfil" aria-current={location.pathname === "/meu-perfil" ? "page" : undefined} onClick={() => { setOpen(false); setHelp(false); }}>
+              <span className="avatar" aria-hidden="true">{initials(user!.nome)}</span>
+              <div><strong>{user!.nome}</strong><small>{admin ? "Administrador FCV" : "Operador FCV"}</small></div>
+            </Link>
             <button
               className="icon-button"
               aria-label="Sair da conta"
@@ -114,8 +113,10 @@ export default function Layout() {
           </div>
           <div className="topbar-right">
             <NotificationCenter />
-            <span className="avatar small">{initials(user!.nome)}</span>
-            <div className="topbar-identity"><strong>{user!.nome}</strong><small>{admin ? "Administrador" : "Operador"}</small></div>
+            <Link to="/meu-perfil" className="profile-link" aria-label="Abrir meu perfil" aria-current={location.pathname === "/meu-perfil" ? "page" : undefined}>
+              <span className="avatar small" aria-hidden="true">{initials(user!.nome)}</span>
+              <div className="topbar-identity"><strong>{user!.nome}</strong><small>{admin ? "Administrador" : "Operador"}</small></div>
+            </Link>
           </div>
         </header>
         <main id="main" className="page-content" tabIndex={-1}>

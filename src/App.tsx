@@ -11,6 +11,7 @@ import Utilizacoes from "./pages/Utilizacoes";
 import Campanhas from "./pages/Campanhas";
 import Relatorios from "./pages/Relatorios";
 import Perfis from "./pages/Perfis";
+import MeuPerfil from "./pages/MeuPerfil";
 import { isAdministrador } from "./models/selectors";
 function Protected() {
   const { user, restoring } = useAuth();
@@ -56,6 +57,7 @@ function Routing() {
         <Route path="campanhas" element={<Campanhas />} />
         <Route path="relatorios" element={<Relatorios />} />
         <Route path="perfis" element={<AdminPage />} />
+        <Route path="meu-perfil" element={<MeuPerfil />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
