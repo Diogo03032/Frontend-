@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { Link } from "react-router-dom";
 import {
   Building2,
   CalendarDays,
@@ -14,7 +15,6 @@ import {
 import {
   Badge,
   DataTable,
-  DetailList,
   EmptyState,
   Field,
   Modal,
@@ -24,7 +24,8 @@ import {
   StatCard,
 } from "../components/ui";
 import { usePortal } from "../viewmodels/PortalContext";
-import { conveniadoNome, formatDate, formatMoney } from "../models/selectors";
+import { useInitialAction } from "../viewmodels/useInitialAction";
+import { conveniadoNome, formatMoney } from "../models/selectors";
 import type { Beneficio } from "../models/types";
 
 const PAGE_SIZE = 8;
@@ -85,7 +86,6 @@ export default function Beneficios() {
   const [page, setPage] = useState(1);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Beneficio>();
-  const [details, setDetails] = useState<Beneficio>();
   const [discontinuing, setDiscontinuing] = useState<Beneficio>();
   const [linking, setLinking] = useState<Beneficio>();
   const [selectedPartner, setSelectedPartner] = useState("");
@@ -149,6 +149,17 @@ export default function Beneficios() {
     setFormError("");
     setFormOpen(true);
   }
+
+  useInitialAction({
+    editar: id => {
+      const item = data.beneficios.find(entry => entry.id === id);
+      if (item) openForm(item);
+    },
+    ofertas: id => {
+      const item = data.beneficios.find(entry => entry.id === id);
+      if (item) setLinking(item);
+    },
+  });
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -389,7 +400,7 @@ export default function Beneficios() {
                 label: "Benefício",
                 render: (item) => (
                   <div>
-                    <div className="cell-title">{item.nome}</div>
+                    <div className="cell-title"><Link className="detail-record-link" to={`/beneficios/${item.id}`}>{item.nome}</Link></div>
                     <div className="cell-subtitle">
                       {item.tipo_beneficio === "PERCENTUAL"
                         ? "Desconto percentual"
@@ -448,14 +459,14 @@ export default function Beneficios() {
                 label: "Ações",
                 render: (item) => (
                   <div className="table-actions">
-                    <button
+                    <Link
                       className="icon-button"
                       title="Visualizar benefício"
                       aria-label={`Visualizar ${item.nome}`}
-                      onClick={() => setDetails(item)}
+                      to={`/beneficios/${item.id}`}
                     >
                       <Eye size={17} />
-                    </button>
+                    </Link>
                     <button
                       className="icon-button"
                       title="Editar benefício"
@@ -742,76 +753,6 @@ export default function Beneficios() {
               </button>
             </div>
           </form>
-        </Modal>
-      )}
-      {details && (
-        <Modal
-          title="Detalhes do benefício"
-          description={details.nome}
-          onClose={() => setDetails(undefined)}
-        >
-          <DetailList
-            items={[
-              { label: "Status", value: <Badge status={details.status} /> },
-              {
-                label: "Descrição",
-                value: details.descricao || "Não informada",
-              },
-              { label: "Condição", value: valueSummary(details) },
-              { label: "Limite e renovação", value: ruleSummary(details) },
-              {
-                label: "Tipo de janela",
-                value:
-                  details.tipo_janela === "CALENDARIO_FIXO"
-                    ? "Calendário fixo"
-                    : "Janela móvel",
-              },
-              ...(details.tipo_janela === "CALENDARIO_FIXO"
-                ? [
-                    {
-                      label: "Data de reset",
-                      value: details.dia_reset
-                        ? formatDate(details.dia_reset)
-                        : "Não definida",
-                    },
-                  ]
-                : [
-                    {
-                      label: "Referência da contagem",
-                      value:
-                        details.referencia_contagem === "ULTIMA_UTILIZACAO"
-                          ? "Última utilização"
-                          : "Data de admissão do colaborador",
-                    },
-                  ]),
-              {
-                label: "Conveniados vinculados",
-                value: activeOffers(details.id).length,
-              },
-            ]}
-          />
-          <div className="modal-footer">
-            <button
-              className="btn btn-secondary"
-              onClick={() => {
-                setLinking(details);
-                setDetails(undefined);
-                setSelectedPartner("");
-                setFormError("");
-              }}
-            >
-              <Link2 size={16} /> Conveniados
-            </button>
-            <button
-              className="btn btn-primary"
-              onClick={() => {
-                openForm(details);
-                setDetails(undefined);
-              }}
-            >
-              <Pencil size={16} /> Editar benefício
-            </button>
-          </div>
         </Modal>
       )}
       {linking && (

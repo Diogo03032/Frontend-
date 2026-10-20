@@ -14,6 +14,8 @@ import {
   X,
   CheckCircle2,
   AlertCircle,
+  CalendarDays,
+  ListTodo,
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "../viewmodels/AuthContext";
@@ -24,11 +26,13 @@ import PortalSearch from "./PortalSearch";
 import NotificationCenter from "./NotificationCenter";
 const navigation = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/pendencias", label: "Central de pendências", icon: ListTodo },
   { to: "/colaboradores", label: "Colaboradores", icon: Users },
   { to: "/beneficios", label: "Benefícios", icon: Gift },
   { to: "/conveniados", label: "Conveniados", icon: Handshake },
   { to: "/utilizacoes", label: "Utilizações", icon: ClipboardList },
   { to: "/campanhas", label: "Campanhas e eventos", icon: Megaphone },
+  { to: "/calendario", label: "Calendário", icon: CalendarDays },
   { to: "/relatorios", label: "Relatórios", icon: ChartNoAxesCombined },
   { to: "/perfis", label: "Configurações", icon: ShieldCheck },
 ];
@@ -39,6 +43,7 @@ export default function Layout() {
   const [open, setOpen] = useState(false),
     [help, setHelp] = useState(false);
   const admin = isAdministrador(user!, data);
+  const pendingCount = data.utilizacoes.filter(item => item.status === "PENDENTE").length + data.conveniados.filter(item => item.status === "EM_ANALISE").length;
   return (
     <div className="app-shell">
       <a className="skip-link" href="#main">
@@ -78,6 +83,9 @@ export default function Layout() {
                   <span className="nav-count" aria-hidden="true">
                     {data.campanhas.filter((c) => c.status === "ATIVA").length}
                   </span>
+                )}
+                {to === "/pendencias" && pendingCount > 0 && (
+                  <span className="nav-count" aria-label="Total de pendências">{pendingCount}</span>
                 )}
               </NavLink>
             ))}

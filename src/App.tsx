@@ -12,6 +12,12 @@ import Campanhas from "./pages/Campanhas";
 import Relatorios from "./pages/Relatorios";
 import Perfis from "./pages/Perfis";
 import MeuPerfil from "./pages/MeuPerfil";
+import PerfilColaborador from "./pages/PerfilColaborador";
+import PainelConveniado from "./pages/PainelConveniado";
+import DetalhesBeneficio from "./pages/DetalhesBeneficio";
+import DetalhesCampanha from "./pages/DetalhesCampanha";
+import Calendario from "./pages/Calendario";
+import Pendencias from "./pages/Pendencias";
 import { isAdministrador } from "./models/selectors";
 function Protected() {
   const { user, restoring } = useAuth();
@@ -51,10 +57,16 @@ function Routing() {
       <Route element={<Protected />}>
         <Route index element={<Dashboard />} />
         <Route path="colaboradores" element={<Colaboradores />} />
+        <Route path="colaboradores/:id" element={<PerfilColaborador />} />
         <Route path="beneficios" element={<Beneficios />} />
+        <Route path="beneficios/:id" element={<DetalhesBeneficio />} />
         <Route path="conveniados" element={<Conveniados />} />
+        <Route path="conveniados/:id" element={<PainelConveniado />} />
         <Route path="utilizacoes" element={<Utilizacoes />} />
         <Route path="campanhas" element={<Campanhas />} />
+        <Route path="campanhas/:id" element={<DetalhesCampanha />} />
+        <Route path="calendario" element={<Calendario />} />
+        <Route path="pendencias" element={<Pendencias />} />
         <Route path="relatorios" element={<Relatorios />} />
         <Route path="perfis" element={<AdminPage />} />
         <Route path="meu-perfil" element={<MeuPerfil />} />

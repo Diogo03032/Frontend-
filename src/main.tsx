@@ -6,6 +6,7 @@ import "./styles/reference.css";
 import "./styles/notifications.css";
 import "./styles/refinements.css";
 import "./styles/profile.css";
+import "./styles/detail-pages.css";
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <App />

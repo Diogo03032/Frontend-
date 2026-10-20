@@ -1,4 +1,5 @@
 import { useMemo, useState, type FormEvent } from "react";
+import { Link } from "react-router-dom";
 import {
   CalendarDays,
   CircleX,
@@ -11,6 +12,7 @@ import {
   Users,
 } from "lucide-react";
 import { usePortal } from "../viewmodels/PortalContext";
+import { useInitialAction } from "../viewmodels/useInitialAction";
 import {
   colaboradorNome,
   formatDate,
@@ -274,12 +276,23 @@ export default function Campanhas() {
     );
   }
 
+  useInitialAction({
+    editar: id => {
+      const item = data.campanhas.find(entry => entry.id === id);
+      if (item) abrirForm(item);
+    },
+    itens: id => {
+      if (data.campanhas.some(item => item.id === id)) setSelectedId(id);
+    },
+    novo: () => abrirForm(),
+  });
+
   const initiativeColumns = [
-    {key:"name",label:"Título",render:(item:Campanha) => <div><strong className="cell-title">{item.nome}</strong><p className="cell-subtitle">{item.descricao || TIPOS[item.tipo]}</p></div>},
+    {key:"name",label:"Título",render:(item:Campanha) => <div><Link className="cell-title detail-record-link" to={`/campanhas/${item.id}`}>{item.nome}</Link><p className="cell-subtitle">{item.descricao || TIPOS[item.tipo]}</p></div>},
     {key:"period",label:"Período",render:(item:Campanha) => <span>{formatDate(item.data_inicio)} a {formatDate(item.data_fim)}</span>},
     {key:"benefits",label:"Benefícios",render:(item:Campanha) => data.itensCampanha.filter(benefit=>benefit.campanha_id===item.id).length},
     {key:"status",label:"Status",render:(item:Campanha) => <Badge status={item.status}/>},
-    {key:"actions",label:"Ações",render:(item:Campanha) => <div className="table-actions"><button className="icon-button" aria-label={`Ver detalhes de ${item.nome}`} onClick={()=>setSelectedId(item.id)}><Eye size={16}/></button><button className="icon-button" aria-label={`Editar ${item.nome}`} onClick={()=>abrirForm(item)}><Pencil size={16}/></button>{!["CANCELADA","ENCERRADA"].includes(item.status) && <button className="icon-button danger" aria-label={`Cancelar ${item.nome}`} onClick={()=>setCancelTarget(item)}><CircleX size={16}/></button>}</div>},
+    {key:"actions",label:"Ações",render:(item:Campanha) => <div className="table-actions"><Link className="icon-button" aria-label={`Ver detalhes de ${item.nome}`} to={`/campanhas/${item.id}`}><Eye size={16}/></Link><button className="icon-button" aria-label={`Editar ${item.nome}`} onClick={()=>abrirForm(item)}><Pencil size={16}/></button>{!["CANCELADA","ENCERRADA"].includes(item.status) && <button className="icon-button danger" aria-label={`Cancelar ${item.nome}`} onClick={()=>setCancelTarget(item)}><CircleX size={16}/></button>}</div>},
   ];
   return (
     <>

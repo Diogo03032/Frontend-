@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { Link } from "react-router-dom";
 import {
   Building2,
   CheckCircle2,
@@ -11,7 +12,6 @@ import {
 import {
   Badge,
   DataTable,
-  DetailList,
   EmptyState,
   Field,
   Modal,
@@ -21,6 +21,7 @@ import {
   StatCard,
 } from "../components/ui";
 import { usePortal } from "../viewmodels/PortalContext";
+import { useInitialAction } from "../viewmodels/useInitialAction";
 import { conveniadoDaUtilizacao, formatCnpj } from "../models/selectors";
 import type { Conveniado } from "../models/types";
 
@@ -52,7 +53,6 @@ export default function Conveniados() {
   const [page, setPage] = useState(1);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Conveniado>();
-  const [details, setDetails] = useState<Conveniado>();
   const [inactivating, setInactivating] = useState<Conveniado>();
   const [form, setForm] = useState<ConveniadoForm>(blankForm);
   const [formError, setFormError] = useState("");
@@ -107,6 +107,13 @@ export default function Conveniados() {
     setFormError("");
     setFormOpen(true);
   }
+
+  useInitialAction({
+    editar: id => {
+      const item = data.conveniados.find(entry => entry.id === id);
+      if (item) openForm(item);
+    },
+  });
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -284,7 +291,7 @@ export default function Conveniados() {
                 label: "Conveniado",
                 render: (item) => (
                   <div>
-                    <div className="cell-title">{item.nome_fantasia}</div>
+                    <div className="cell-title"><Link className="detail-record-link" to={`/conveniados/${item.id}`}>{item.nome_fantasia}</Link></div>
                     <div className="cell-subtitle">{item.razao_social}</div>
                   </div>
                 ),
@@ -321,14 +328,14 @@ export default function Conveniados() {
                 label: "Ações",
                 render: (item) => (
                   <div className="table-actions">
-                    <button
+                    <Link
                       className="icon-button"
                       title="Visualizar conveniado"
                       aria-label={`Visualizar ${item.nome_fantasia}`}
-                      onClick={() => setDetails(item)}
+                      to={`/conveniados/${item.id}`}
                     >
                       <Eye size={17} />
-                    </button>
+                    </Link>
                     <button
                       className="icon-button"
                       title="Editar conveniado"
@@ -515,54 +522,6 @@ export default function Conveniados() {
               </button>
             </div>
           </form>
-        </Modal>
-      )}
-      {details && (
-        <Modal
-          title="Detalhes do conveniado"
-          description={details.nome_fantasia}
-          onClose={() => setDetails(undefined)}
-        >
-          <DetailList
-            items={[
-              { label: "Status", value: <Badge status={details.status} /> },
-              { label: "Razão social", value: details.razao_social },
-              { label: "CNPJ", value: formatCnpj(details.cnpj) },
-              { label: "Categoria", value: details.categoria },
-              { label: "Endereço", value: details.endereco },
-              {
-                label: "Usuário responsável",
-                value:
-                  data.usuarios.find((user) => user.id === details.usuario_id)
-                    ?.nome || "Usuário não disponível",
-              },
-              { label: "Ofertas ativas", value: activeOfferCount(details.id) },
-              {
-                label: "Registros de utilização",
-                value: data.utilizacoes.filter(
-                  (item) =>
-                    conveniadoDaUtilizacao(data, item)?.id === details.id,
-                ).length,
-              },
-            ]}
-          />
-          <div className="modal-footer">
-            <button
-              className="btn btn-secondary"
-              onClick={() => setDetails(undefined)}
-            >
-              Fechar
-            </button>
-            <button
-              className="btn btn-primary"
-              onClick={() => {
-                openForm(details);
-                setDetails(undefined);
-              }}
-            >
-              <Pencil size={16} /> Editar cadastro
-            </button>
-          </div>
         </Modal>
       )}
       {inactivating && (

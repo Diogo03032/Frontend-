@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { Link } from "react-router-dom";
 import {
   Eye,
   Pencil,
@@ -11,7 +12,6 @@ import {
 import {
   Badge,
   DataTable,
-  DetailList,
   EmptyState,
   Field,
   Modal,
@@ -21,6 +21,7 @@ import {
   StatCard,
 } from "../components/ui";
 import { usePortal } from "../viewmodels/PortalContext";
+import { useInitialAction } from "../viewmodels/useInitialAction";
 import { colaboradorNome, formatDate } from "../models/selectors";
 import type { Colaborador } from "../models/types";
 
@@ -52,7 +53,6 @@ export default function Colaboradores() {
   const [page, setPage] = useState(1);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Colaborador>();
-  const [details, setDetails] = useState<Colaborador>();
   const [inactivating, setInactivating] = useState<Colaborador>();
   const [form, setForm] = useState<ColaboradorForm>(blankForm);
   const [formError, setFormError] = useState("");
@@ -108,6 +108,13 @@ export default function Colaboradores() {
     setFormError("");
     setFormOpen(true);
   }
+
+  useInitialAction({
+    editar: id => {
+      const item = data.colaboradores.find(entry => entry.id === id);
+      if (item) openForm(item);
+    },
+  });
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -274,7 +281,7 @@ export default function Colaboradores() {
                 render: (item) => (
                   <div>
                     <div className="cell-title">
-                      {colaboradorNome(data, item.id)}
+                      <Link className="detail-record-link" to={`/colaboradores/${item.id}`}>{colaboradorNome(data, item.id)}</Link>
                     </div>
                     <div className="cell-subtitle">{item.cargo}</div>
                   </div>
@@ -303,14 +310,14 @@ export default function Colaboradores() {
                 label: "Ações",
                 render: (item) => (
                   <div className="table-actions">
-                    <button
+                    <Link
                       className="icon-button"
                       title="Visualizar colaborador"
                       aria-label={`Visualizar ${colaboradorNome(data, item.id)}`}
-                      onClick={() => setDetails(item)}
+                      to={`/colaboradores/${item.id}`}
                     >
                       <Eye size={17} />
-                    </button>
+                    </Link>
                     <button
                       className="icon-button"
                       title="Editar colaborador"
@@ -484,53 +491,6 @@ export default function Colaboradores() {
               </button>
             </div>
           </form>
-        </Modal>
-      )}
-      {details && (
-        <Modal
-          title="Detalhes do colaborador"
-          description={colaboradorNome(data, details.id)}
-          onClose={() => setDetails(undefined)}
-        >
-          <DetailList
-            items={[
-              { label: "Status", value: <Badge status={details.status} /> },
-              { label: "Matrícula", value: details.matricula },
-              { label: "Setor", value: details.setor },
-              { label: "Cargo", value: details.cargo },
-              { label: "Admissão", value: formatDate(details.data_admissao) },
-              { label: "Telefone", value: details.telefone || "Não informado" },
-              {
-                label: "E-mail",
-                value:
-                  data.usuarios.find((user) => user.id === details.usuario_id)
-                    ?.email || "Usuário não disponível",
-              },
-              {
-                label: "Registros de utilização",
-                value: data.utilizacoes.filter(
-                  (item) => item.colaborador_id === details.id,
-                ).length,
-              },
-            ]}
-          />
-          <div className="modal-footer">
-            <button
-              className="btn btn-secondary"
-              onClick={() => setDetails(undefined)}
-            >
-              Fechar
-            </button>
-            <button
-              className="btn btn-primary"
-              onClick={() => {
-                openForm(details);
-                setDetails(undefined);
-              }}
-            >
-              <Pencil size={16} /> Editar cadastro
-            </button>
-          </div>
         </Modal>
       )}
       {inactivating && (

@@ -1,0 +1,23 @@
+.entity-detail-page .detail-sidebar .detail-list { grid-template-columns: 1fr; margin-bottom: 0; }
+.entity-identity { display: flex; align-items: center; flex-direction: column; gap: 12px; text-align: center; }
+.entity-identity h2 { margin: 0; font-size: 20px; line-height: 1.4; overflow-wrap: anywhere; }
+.entity-identity .detail-subtitle { margin: 0; }
+.entity-identity-caption { display: block; width: 100%; border-top: 1px solid var(--stroke); padding-top: 16px; margin-top: 4px; color: #5e7690; font-size: 12px; overflow-wrap: anywhere; }
+.entity-information { display: flex; align-items: flex-start; gap: 10px; padding: 17px; border-radius: 12px; background: #eaf3ff; color: #45688f; }
+.entity-information svg { flex-shrink: 0; margin-top: 2px; }
+.entity-information p { margin: 0; font-size: 12px; line-height: 1.7; }
+.entity-record-link { display: inline-flex; align-items: baseline; gap: 5px; color: #155cac; font-weight: 650; font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
+.entity-record-link svg { flex-shrink: 0; align-self: center; }
+a.entity-record-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+.entity-row-note { display: block; color: #6d8198; font-size: 11px; margin-top: 5px; line-height: 1.6; overflow-wrap: anywhere; }
+.entity-row-note .badge { font-size: 10px; padding: 3px 7px; vertical-align: middle; }
+.entity-offer-status { display: flex; align-items: flex-end; flex-direction: column; gap: 5px; flex-shrink: 0; }
+.entity-offer-status > span:first-child { color: #6d8198; font-size: 10px; }
+.entity-period-note { color: #6d8198; font-size: 11px; line-height: 1.7; margin: 0; }
+.entity-anchor-section { scroll-margin-top: 90px; min-width: 0; }
+.entity-detail-page .detail-list-item > div:first-child { min-width: 0; }
+@media (max-width: 500px) {
+  .entity-detail-page .detail-list-item { align-items: flex-start; flex-direction: column; gap: 10px; }
+  .entity-offer-status { align-items: flex-start; flex-direction: row; }
+  .entity-identity h2 { font-size: 19px; }
+}

@@ -1,10 +1,21 @@
 # Portal de benefícios FCV - Grupo 3
 
-Portal da Fundação Cristiano Varella em React, TypeScript, Vite e CSS convencional. O repositório recebido continha somente o README; por isso esta entrega inclui a base de login, visão geral e conveniados, além das seis páginas solicitadas.
+Portal da Fundação Cristiano Varella em React, TypeScript, Vite e CSS convencional. Reúne autenticação, gestão de cadastros, benefícios, utilizações, campanhas e relatórios.
 
 Este repositório é exclusivo do **frontend web**. O backend é mantido separadamente em [joaovictorcascardo/fcv-backend](https://github.com/joaovictorcascardo/fcv-backend), responsável pela API, autenticação, regras do servidor e acesso ao MySQL com Knex. O portal consome essa API por HTTP; os dois projetos são executados e versionados separadamente.
 
-## As seis páginas adicionadas
+## Seis novas telas de acompanhamento
+
+- **Perfil do colaborador** (`/colaboradores/:id`): dados cadastrais, estatísticas, histórico e benefícios/campanhas relacionados.
+- **Painel do conveniado** (`/conveniados/:id`): cadastro, ofertas comuns e promocionais, gráfico e utilizações do estabelecimento.
+- **Detalhes do benefício** (`/beneficios/:id`): regras de renovação, limites, conveniados vinculados e histórico.
+- **Calendário** (`/calendario`): navegação mensal, filtros por tipo/status e agenda por dia durante toda a vigência das iniciativas.
+- **Central de pendências** (`/pendencias`): conveniados em análise e utilizações pendentes, com busca, filtros e encaminhamento ao registro.
+- **Detalhes da campanha ou evento** (`/campanhas/:id`): período, elegibilidade, patrocinador, itens, conveniados e participação apurada por usos aprovados.
+
+As páginas usam os dados recebidos da API existente. Os nomes e ícones de visualização das listagens abrem os detalhes; as ações de edição reutilizam os formulários existentes. Calendário e pendências também estão no menu lateral. Veja os critérios e fluxos em [Novas telas](docs/NOVAS_TELAS.md).
+
+## Áreas de gestão existentes
 
 - **Colaboradores** (`/colaboradores`): pesquisa, filtros, paginação, cadastro, detalhes, edição e inativação, com vínculo a uma conta de colaborador.
 - **Benefícios e ofertas** (`/beneficios`): cadastro, regras de ciclo/janela, edição, descontinuação e vínculos ativos/inativos com conveniados.
@@ -59,6 +70,8 @@ npm run preview
 ```
 
 Os testes de domínio cobrem relatórios por data/status, estornos, vínculos regulares/promocionais, restrição de administrador, filtro de período e integridade das fixtures de teste. Essas fixtures ficam exclusivamente em `tests/`.
+
+Para as seis novas telas de acompanhamento, foram aprovados 18 testes de domínio, o build de produção e 69 verificações locais em Chrome headless com a API real. A conferência incluiu 30 combinações de tela/largura, edição sem salvar, métricas, calendário, pendências e permissões de administrador/operador, sem alterar os dados do banco. Os critérios e limites dessa validação estão em [Novas telas](docs/NOVAS_TELAS.md#validação).
 
 A verificação em Chromium usa o backend e MySQL reais: login, senha incorreta, restauração de sessão, rejeição de token inválido, logout, restrição do operador, busca e edição de benefício persistida no banco, com restauração do valor original. As oito telas internas foram conferidas em 320, 390, 768, 1024 e 1440 px. O login foi conferido também em 1920 px. Não foram usadas respostas de API interceptadas nessa verificação.
 
