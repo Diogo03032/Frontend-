@@ -3,8 +3,9 @@ import { Navigate } from "react-router-dom";
 import { ArrowRight, Eye, EyeOff, LockKeyhole, UserRound, ShieldCheck } from "lucide-react";
 import { useAuth } from "../viewmodels/AuthContext";
 import Brand from "../components/Brand";
+import LocalDemoAccessButton from "../local-demo/LocalDemoAccessButton";
 export default function Login() {
-  const { user, restoring, login } = useAuth();
+  const { user, restoring, login, loginLocal } = useAuth();
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [visible, setVisible] = useState(false);
@@ -36,6 +37,7 @@ export default function Login() {
           {error && <p className="form-error" role="alert">{error}</p>}
           <button className="btn btn-primary login-submit" disabled={busy}>{busy ? "Entrando…" : "Entrar"}<ArrowRight size={23} /></button>
         </form>
+        <LocalDemoAccessButton disabled={busy} onAccess={loginLocal} />
         <div className="login-security"><ShieldCheck size={29} /><span>Ambiente seguro</span></div>
       </div>
     </section>

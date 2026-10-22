@@ -9,6 +9,11 @@ import {
 import type { PortalData, Resource, Entity } from "../models/types";
 import { isAdministrador } from "../models/selectors";
 import { listResource, saveResource } from "../services/api";
+import {
+  createLocalDemoData,
+  isLocalDemoUser,
+  saveLocalDemoEntity,
+} from "../local-demo/localDemo";
 import { useAuth } from "./AuthContext";
 const empty: PortalData = {
   usuarios: [],
@@ -56,6 +61,13 @@ export function PortalProvider({ children }: { children: ReactNode }) {
     const current = ++generation.current;
     setLoading(true);
     setError(null);
+    if (isLocalDemoUser(user)) {
+      const next = createLocalDemoData();
+      setData(next);
+      dataRef.current = next;
+      setLoading(false);
+      return;
+    }
     const resources = Object.keys(empty) as Resource[];
     try {
       const results = await Promise.all(resources.map((r) => listResource(r)));
@@ -109,9 +121,11 @@ export function PortalProvider({ children }: { children: ReactNode }) {
       )
         throw new Error("O histórico de utilização não pode ser editado.");
     }
-    const result = await saveResource(resource, id, payload);
     const currentData = dataRef.current;
     const rows = currentData[resource] as Entity<K>[];
+    const result = isLocalDemoUser(user)
+      ? saveLocalDemoEntity(rows, id, payload)
+      : await saveResource(resource, id, payload);
     const next = {
       ...currentData,
       [resource]:

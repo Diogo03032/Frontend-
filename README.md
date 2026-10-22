@@ -26,7 +26,9 @@ npm ci
 npm run dev
 ```
 
-Abra o endereço exibido no terminal (por padrão `http://127.0.0.1:5173`). O backend deve estar em execução para entrar e carregar os dados. O portal usa exclusivamente a API real, sem modo de demonstração ou armazenamento local de cadastros.
+Abra o endereço exibido no terminal (por padrão `http://127.0.0.1:5173`). Para usar contas e dados reais, mantenha o backend em execução.
+
+Sem backend, use **Acessar perfil local de demonstração** na tela de login. Esse acesso de administrador aparece somente em `npm run dev`, usa dados fictícios para navegar pelas páginas e mantém alterações apenas na memória da sessão; atualizar a página restaura os dados de exemplo. Ele não está disponível na versão de produção.
 
 ## Conectar à API real
 
