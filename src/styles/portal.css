@@ -860,6 +860,25 @@ tbody tr:hover {
   border-radius: 6px;
   grid-column: 1/-1;
 }
+.field-invalid input,
+.field-invalid select,
+.field-invalid textarea { border-color: #c74661 !important; }
+.field-validation-error { color: #c74661 !important; font-weight: 600; }
+.validation-summary {
+  margin-top: 16px;
+  padding: 12px 16px;
+  border: 1px solid #f0c8d0;
+  border-left: 4px solid #c74661;
+  border-radius: 10px;
+  background: #fff7f8;
+  color: #8f2f45;
+  box-shadow: 0 8px 22px #17395f18;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.validation-summary strong { display: block; margin-bottom: 4px; }
+.validation-summary ul { margin: 0; padding-left: 18px; display: grid; gap: 2px; }
+.validation-summary li { overflow-wrap: anywhere; }
 .modal-footer {
   display: flex;
   justify-content: flex-end;

@@ -1,6 +1,16 @@
-import { useEffect, useId, useRef, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight, Search, X, Inbox, Users, Gift, Handshake, ClipboardList, Megaphone, ChartNoAxesCombined, Settings } from "lucide-react";
 import { statusLabel } from "../models/selectors";
+const ValidationContext = createContext<string[]>([]);
+function invalidFields(form: HTMLFormElement) {
+  form.querySelectorAll(".field").forEach((field) => {
+    if (field.querySelector("em"))
+      field.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>("input,select,textarea").forEach((input) => { input.required = true; });
+  });
+  return [...new Set([...form.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>("input,select,textarea")]
+    .filter((input) => input.willValidate && (!input.validity.valid || (input.required && !input.value.trim()) || (input.inputMode === "numeric" && input.value.replace(/\D/g, "").length !== 14)))
+    .map((input) => input.closest(".field")?.querySelector("span")?.textContent?.replace("*", "").trim() || "Campo obrigatório"))];
+}
 export function PageHeader({
   title,
   description,
@@ -180,8 +190,9 @@ export function Field({
   error?: string;
   required?: boolean;
 }) {
+  const invalid = useContext(ValidationContext).includes(label);
   return (
-    <label className="field">
+    <label className={`field ${invalid ? "field-invalid" : ""}`}>
       <span>
         {label}
         {required && <em aria-hidden="true"> *</em>}
@@ -189,6 +200,7 @@ export function Field({
       {children}
       {hint && <small>{hint}</small>}
       {error && <small className="form-error">{error}</small>}
+      {invalid && <small className="field-validation-error">Preencha ou corrija este campo.</small>}
     </label>
   );
 }
@@ -237,10 +249,12 @@ export function Modal({
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const id = useId();
+  const [pending, setPending] = useState<string[]>([]);
   useEffect(() => {
     const dialog = ref.current;
     const previousFocus = document.activeElement;
     dialog?.showModal();
+    dialog?.querySelectorAll("form").forEach((form) => { form.noValidate = true; });
     return () => {
       dialog?.close();
       if (previousFocus instanceof HTMLElement && previousFocus.isConnected)
@@ -269,6 +283,28 @@ export function Modal({
             onClose();
         }
       }}
+      onSubmitCapture={(event) => {
+        if (event.target instanceof HTMLFormElement) {
+          const issues = invalidFields(event.target);
+          setPending(issues);
+          if (issues.length) { event.preventDefault(); event.stopPropagation(); }
+        }
+      }}
+      onInputCapture={(event) => {
+        if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) event.target.value = event.target.value.replace(/^\s+/, "");
+        if (event.target instanceof HTMLInputElement && event.target.type === "tel") event.target.value = event.target.value.replace(/[^\d+()\s-]/g, "");
+        if (event.target instanceof HTMLInputElement && event.target.inputMode === "numeric") event.target.value = event.target.value.replace(/[^\d./-]/g, "");
+        if (pending.length && event.target instanceof HTMLElement) {
+          const form = event.target.closest("form");
+          if (form) setPending(invalidFields(form));
+        }
+      }}
+      onChangeCapture={(event) => {
+        if (pending.length && event.target instanceof HTMLElement) {
+          const form = event.target.closest("form");
+          if (form) setPending(invalidFields(form));
+        }
+      }}
     >
       <div className="modal-header">
         <div>
@@ -284,7 +320,12 @@ export function Modal({
           <X size={20} />
         </button>
       </div>
-      <div className="modal-body">{children}</div>
+      <div className="modal-body">
+        <ValidationContext.Provider value={pending}>
+          {children}
+          {pending.length > 0 && <div className="validation-summary" role="alert"><strong>Revise os campos abaixo:</strong><ul>{pending.map((field) => <li key={field}>{field}</li>)}</ul></div>}
+        </ValidationContext.Provider>
+      </div>
     </dialog>
   );
 }
