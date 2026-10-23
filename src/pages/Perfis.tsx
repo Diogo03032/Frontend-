@@ -10,6 +10,7 @@ import {
   UserCheck,
   Users,
 } from "lucide-react";
+import { ConfirmModal } from "../components/ConfirmModal";
 import {
   Badge,
   DataTable,
@@ -1092,30 +1093,17 @@ export default function Perfis() {
         </Modal>
       )}
       {inactivating && (
-        <Modal
+        <ConfirmModal
           title={`Inativar ${inactivating.type === "perfil" ? "perfil" : "usuário"}`}
           description={`Deseja inativar ${inactivating.item.nome}? ${inactivating.type === "perfil" ? "O perfil deixará de estar disponível para novas contas. Os vínculos existentes serão preservados." : "O login desta conta será bloqueado. Os cadastros e históricos vinculados serão preservados."}`}
           onClose={() => {
             if (!submitting) setInactivating(undefined);
           }}
-        >
-          <div className="modal-footer">
-            <button
-              className="btn btn-secondary"
-              disabled={submitting}
-              onClick={() => setInactivating(undefined)}
-            >
-              Cancelar
-            </button>
-            <button
-              className="btn btn-danger"
-              disabled={submitting}
-              onClick={inactivate}
-            >
-              {submitting ? "Inativando..." : "Confirmar inativação"}
-            </button>
-          </div>
-        </Modal>
+          onConfirm={inactivate}
+          confirming={submitting}
+          confirmLabel="Confirmar inativação"
+          confirmingLabel="Inativando..."
+        />
       )}
     </>
   );

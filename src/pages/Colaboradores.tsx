@@ -8,6 +8,7 @@ import {
   Users,
   UserRoundCheck,
 } from "lucide-react";
+import { ConfirmModal } from "../components/ConfirmModal";
 import {
   Badge,
   DataTable,
@@ -534,30 +535,17 @@ export default function Colaboradores() {
         </Modal>
       )}
       {inactivating && (
-        <Modal
+        <ConfirmModal
           title="Inativar colaborador"
           description={`Deseja inativar ${colaboradorNome(data, inactivating.id)}? O acesso aos benefícios será bloqueado e os registros anteriores serão preservados.`}
           onClose={() => {
             if (!submitting) setInactivating(undefined);
           }}
-        >
-          <div className="modal-footer">
-            <button
-              className="btn btn-secondary"
-              disabled={submitting}
-              onClick={() => setInactivating(undefined)}
-            >
-              Cancelar
-            </button>
-            <button
-              className="btn btn-danger"
-              disabled={submitting}
-              onClick={inactivate}
-            >
-              {submitting ? "Inativando..." : "Confirmar inativação"}
-            </button>
-          </div>
-        </Modal>
+          onConfirm={inactivate}
+          confirming={submitting}
+          confirmLabel="Confirmar inativação"
+          confirmingLabel="Inativando..."
+        />
       )}
     </>
   );

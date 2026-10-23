@@ -8,6 +8,7 @@ import {
   RotateCcw,
   Users,
 } from "lucide-react";
+import { ConfirmModal } from "../components/ConfirmModal";
 import { usePortal } from "../viewmodels/PortalContext";
 import {
   beneficioDaUtilizacao,
@@ -506,14 +507,18 @@ export default function Utilizacoes() {
         </Modal>
       )}
       {reversal && (
-        <Modal
+        <ConfirmModal
           title="Estornar utilização"
           description={`O registro #${String(reversal.id).padStart(5, "0")} permanecerá no histórico com o status Estornada.`}
           onClose={() => {
             if (!saving) setReversal(null);
           }}
+          onConfirm={estornar}
+          confirming={saving}
+          confirmLabel="Confirmar estorno"
+          confirmingLabel="Estornando…"
+          confirmDisabled={!motivo.trim()}
         >
-          <form onSubmit={estornar}>
             <DetailList
               items={[
                 {
@@ -547,25 +552,7 @@ export default function Utilizacoes() {
                 placeholder="Descreva por que esta utilização será estornada"
               />
             </Field>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                disabled={saving}
-                onClick={() => setReversal(null)}
-              >
-                Cancelar
-              </button>
-              <button
-                className="btn btn-danger"
-                type="submit"
-                disabled={saving || !motivo.trim()}
-              >
-                {saving ? "Estornando…" : "Confirmar estorno"}
-              </button>
-            </div>
-          </form>
-        </Modal>
+        </ConfirmModal>
       )}
     </>
   );

@@ -8,6 +8,7 @@ import {
   Plus,
   Power,
 } from "lucide-react";
+import { ConfirmModal } from "../components/ConfirmModal";
 import {
   Badge,
   DataTable,
@@ -566,30 +567,17 @@ export default function Conveniados() {
         </Modal>
       )}
       {inactivating && (
-        <Modal
+        <ConfirmModal
           title="Inativar conveniado"
           description={`Deseja inativar ${inactivating.nome_fantasia}? O estabelecimento deixará de registrar resgates. As ofertas e utilizações anteriores serão preservadas.`}
           onClose={() => {
             if (!submitting) setInactivating(undefined);
           }}
-        >
-          <div className="modal-footer">
-            <button
-              className="btn btn-secondary"
-              disabled={submitting}
-              onClick={() => setInactivating(undefined)}
-            >
-              Cancelar
-            </button>
-            <button
-              className="btn btn-danger"
-              disabled={submitting}
-              onClick={inactivate}
-            >
-              {submitting ? "Inativando..." : "Confirmar inativação"}
-            </button>
-          </div>
-        </Modal>
+          onConfirm={inactivate}
+          confirming={submitting}
+          confirmLabel="Confirmar inativação"
+          confirmingLabel="Inativando..."
+        />
       )}
     </>
   );
