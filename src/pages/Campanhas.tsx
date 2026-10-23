@@ -67,7 +67,8 @@ export default function Campanhas() {
   const [status, setStatus] = useState("");
   const [inicio, setInicio] = useState("");
   const [fim, setFim] = useState("");
-  const [page, setPage] = useState(1);
+  const [campaignPage, setCampaignPage] = useState(1);
+  const [eventPage, setEventPage] = useState(1);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [editing, setEditing] = useState<Campanha | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -96,13 +97,18 @@ export default function Campanhas() {
       ),
     [data.campanhas, search, tipo, status, inicio, fim, periodoInvalido],
   );
-  const currentPage = Math.min(
-    page,
-    Math.max(1, Math.ceil(rows.length / PAGE_SIZE)),
-  );
-  const visibleRows = [...rows]
-    .sort((a, b) => b.data_inicio.localeCompare(a.data_inicio))
-    .slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const campaigns = rows.filter((item) => !item.tipo.startsWith("EVENTO")).sort((a, b) => b.data_inicio.localeCompare(a.data_inicio));
+  const events = rows.filter((item) => item.tipo.startsWith("EVENTO")).sort((a, b) => b.data_inicio.localeCompare(a.data_inicio));
+  const paginate = (items: Campanha[], page: number) => {
+    const current = Math.min(page, Math.max(1, Math.ceil(items.length / PAGE_SIZE)));
+    return { current, rows: items.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE) };
+  };
+  const campaignList = paginate(campaigns, campaignPage);
+  const eventList = paginate(events, eventPage);
+  const lists = [
+    { title: "Campanhas", one: "campanha", many: "campanhas", icon: <Megaphone size={20} />, items: campaigns, ...campaignList, onChange: setCampaignPage },
+    { title: "Eventos", one: "evento", many: "eventos", icon: <CalendarDays size={20} />, items: events, ...eventList, onChange: setEventPage },
+  ];
   const campanhaItems = data.itensCampanha.filter(
     (item) => item.campanha_id === selectedId,
   );
@@ -130,7 +136,8 @@ export default function Campanhas() {
   const today = new Date().toLocaleDateString("sv-SE");
   const filter = (setter: (value: string) => void, value: string) => {
     setter(value);
-    setPage(1);
+    setCampaignPage(1);
+    setEventPage(1);
   };
 
   function abrirForm(item?: Campanha) {
@@ -293,7 +300,7 @@ export default function Campanhas() {
           </button>
         }
       />
-      <div className="stats-grid">
+      <div className="stats-grid campaign-stats">
         <StatCard
           label="Campanhas em andamento"
           value={
@@ -349,7 +356,7 @@ export default function Campanhas() {
           </div>
           <span className="result-count">{rows.length} iniciativas</span>
         </div>
-        <div className="filters">
+        <div className="filters campaign-filter-row">
           <SearchField
             value={search}
             onChange={(value) => filter(setSearch, value)}
@@ -382,7 +389,7 @@ export default function Campanhas() {
             </select>
           </Field>
         </div>
-        <div className="filters">
+        <div className="filters campaign-filter-dates">
           <Field label="Vigente a partir de">
             <input
               type="date"
@@ -411,8 +418,19 @@ export default function Campanhas() {
           </p>
         </div>
         <div className="campaign-overview">
-          <section className="panel"><div className="panel-header"><h2><Megaphone size={20}/> Campanhas</h2></div><DataTable rows={visibleRows.filter(item=>!item.tipo.startsWith("EVENTO"))} columns={initiativeColumns} getRowKey={item=>item.id}/></section>
-          <section className="panel"><div className="panel-header"><h2><CalendarDays size={20}/> Eventos</h2></div><DataTable rows={visibleRows.filter(item=>item.tipo.startsWith("EVENTO"))} columns={initiativeColumns} getRowKey={item=>item.id}/></section>
+          {lists.filter((list) => list.items.length > 0).map((list) => (
+            <section className="panel campaign-list" key={list.title}>
+              <div className="panel-header"><h2>{list.icon} {list.title}</h2><span className="campaign-count">{list.items.length} {list.items.length === 1 ? list.one : list.many}</span></div>
+              <DataTable rows={list.rows} columns={initiativeColumns} getRowKey={(item) => item.id} />
+              <Pagination page={list.current} total={list.items.length} pageSize={PAGE_SIZE} onChange={list.onChange} />
+            </section>
+          ))}
+          {!rows.length && (
+            <EmptyState
+              title="Nenhuma iniciativa encontrada"
+              description="Ajuste os filtros ou cadastre uma campanha ou evento."
+            />
+          )}
           <section className="panel promotional-table"><div className="panel-header"><h2><Gift size={20}/> Benefícios promocionais</h2></div><DataTable rows={data.itensCampanha.filter(item=>rows.some(campanha=>campanha.id===item.campanha_id))} columns={[
             {key:"name",label:"Benefício",render:item=><strong className="cell-title">{item.nome}</strong>},
             {key:"campaign",label:"Campanha / evento",render:item=>data.campanhas.find(campanha=>campanha.id===item.campanha_id)?.nome},
@@ -421,12 +439,6 @@ export default function Campanhas() {
             {key:"actions",label:"Ações",render:item=><button className="icon-button" aria-label={`Gerenciar ${item.nome}`} onClick={()=>setSelectedId(item.campanha_id)}><Eye size={16}/></button>},
           ]} getRowKey={item=>item.id}/></section>
         </div>
-        <Pagination
-          page={currentPage}
-          total={rows.length}
-          pageSize={PAGE_SIZE}
-          onChange={setPage}
-        />
       </section>
       {selected && !showForm && !showItemForm && !linkItem && (
         <Modal
