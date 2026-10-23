@@ -246,6 +246,8 @@
   border-radius: 8px;
 }
 
+.app-shell .portal-search-results a[aria-selected="true"] { background: #edf6ff; }
+
 .app-shell .notification-trigger,
 .modal .notification-item {
   transition:

@@ -38,7 +38,7 @@ export default function NotificationCenter() {
       <Bell size={22} aria-hidden="true" />
       {ready && pending.length > 0 && <span className="notification-count" aria-hidden="true">{pending.length > 99 ? "99+" : pending.length}</span>}
     </button>
-    <span id={countId} className="sr-only">{loading ? "Carregando notificações" : error ? "Notificações indisponíveis" : countLabel}</span>
+    <span id={countId} className="sr-only" role="status" aria-live="polite" aria-atomic="true">{loading ? "Carregando notificações" : error ? "Notificações indisponíveis" : countLabel}</span>
 
     {open && <Modal title="Notificações" description="Acompanhe as utilizações que aguardam validação." onClose={() => setOpen(false)}>
       <div className="notifications-toolbar">

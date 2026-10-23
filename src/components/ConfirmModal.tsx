@@ -24,9 +24,14 @@ export function ConfirmModal({
   confirmDisabled = false,
   children,
 }: ConfirmModalProps) {
+  function handleSubmit(event: Parameters<FormEventHandler<HTMLFormElement>>[0]) {
+    event.preventDefault();
+    onConfirm(event);
+  }
+
   return (
     <Modal title={title} description={description} onClose={onClose}>
-      <form onSubmit={onConfirm}>
+      <form onSubmit={handleSubmit}>
         {children}
         <div className="modal-footer">
           <button

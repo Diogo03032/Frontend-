@@ -265,6 +265,8 @@ export function Modal({
     <dialog
       ref={ref}
       className={`modal ${wide ? "modal-wide" : ""}`}
+      role="dialog"
+      aria-modal="true"
       aria-labelledby={id}
       aria-describedby={description ? `${id}-description` : undefined}
       onCancel={(e) => {
