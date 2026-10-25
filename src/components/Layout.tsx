@@ -18,6 +18,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../viewmodels/AuthContext";
 import { usePortal } from "../viewmodels/PortalContext";
+import { useToast } from "../viewmodels/ToastContext";
 import {
   capitalizeFirstLetter,
   initials,
@@ -50,7 +51,8 @@ const helpByPage: Record<string, string> = {
 export default function Layout() {
   const { user, logout } = useAuth();
   const location = useLocation();
-  const { loading, error, reload, toast, data } = usePortal();
+  const { loading, error, reload, data } = usePortal();
+  const { toast } = useToast();
   const pageHelp =
     helpByPage[location.pathname] ??
     "Use o menu para acessar cadastros, utilizações e relatórios do portal.";
@@ -204,7 +206,7 @@ export default function Layout() {
               </button>
             </div>
           ) : (
-            <Outlet key={location.pathname + location.search} />
+            <Outlet key={location.pathname} />
           )}
           <footer className="page-footer">
             <span>Fundação Cristiano Varella · Pela vida.</span>

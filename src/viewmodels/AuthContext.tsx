@@ -1,7 +1,9 @@
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
   type ReactNode,
 } from "react";
@@ -28,11 +30,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [restoring, setRestoring] = useState(
       () => !hasLocalDemoSession() && hasToken(),
     );
-  function logout() {
+  const logout = useCallback(() => {
     clearLocalDemoSession();
     setToken(null);
     setUser(null);
-  }
+  }, []);
   useEffect(() => {
     let active = true;
     if (hasLocalDemoSession()) setRestoring(false);
@@ -54,18 +56,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       window.removeEventListener("fcv:unauthorized", expire);
     };
   }, []);
-  async function login(email: string, senha: string) {
+  const login = useCallback(async (email: string, senha: string) => {
     clearLocalDemoSession();
     const u = await loginApi(email, senha);
     setUser(u);
-  }
-  function loginLocal() {
+  }, []);
+  const loginLocal = useCallback(() => {
     if (!startLocalDemoSession()) return;
     setToken(null);
     setUser(localDemoUser);
-  }
+  }, []);
+  const value = useMemo<Auth>(
+    () => ({ user, restoring, login, loginLocal, logout }),
+    [user, restoring, login, loginLocal, logout],
+  );
   return (
-    <Context.Provider value={{ user, restoring, login, loginLocal, logout }}>
+    <Context.Provider value={value}>
       {children}
     </Context.Provider>
   );

@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes, Link } from "react-router-dom";
 import { AuthProvider, useAuth } from "./viewmodels/AuthContext";
 import { PortalProvider, usePortal } from "./viewmodels/PortalContext";
+import { ToastProvider } from "./viewmodels/ToastContext";
 import Layout from "./components/Layout";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
@@ -22,9 +23,11 @@ function Protected() {
       </div>
     );
   return user ? (
-    <PortalProvider>
-      <Layout />
-    </PortalProvider>
+    <ToastProvider>
+      <PortalProvider>
+        <Layout />
+      </PortalProvider>
+    </ToastProvider>
   ) : (
     <Navigate to="/login" replace />
   );

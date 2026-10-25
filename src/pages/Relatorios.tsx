@@ -8,6 +8,7 @@ import {
   Users,
 } from "lucide-react";
 import { usePortal } from "../viewmodels/PortalContext";
+import { useToast } from "../viewmodels/ToastContext";
 import { buildReport } from "../models/reportSelectors";
 import {
   beneficioDaUtilizacao,
@@ -81,7 +82,8 @@ function csvCell(value: unknown) {
 }
 
 export default function Relatorios() {
-  const { data, notify } = usePortal();
+  const { data } = usePortal();
+  const { notify } = useToast();
   const now = new Date();
   const [inicio, setInicio] = useState(() =>
     dateOnly(new Date(now.getFullYear(), now.getMonth(), 1)),

@@ -1,7 +1,9 @@
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type ReactNode,
@@ -27,13 +29,10 @@ const empty: PortalData = {
   ofertasCampanha: [],
   utilizacoes: [],
 };
-type Toast = { message: string; type: "success" | "error" | "info" };
 interface Portal {
   data: PortalData;
   loading: boolean;
   error: string | null;
-  toast: Toast | null;
-  notify: (message: string, type?: Toast["type"]) => void;
   reload: () => Promise<void>;
   save: <K extends Resource>(
     resource: K,
@@ -46,22 +45,17 @@ export function PortalProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [data, setData] = useState<PortalData>(empty),
     [loading, setLoading] = useState(true),
-    [error, setError] = useState<string | null>(null),
-    [toast, setToast] = useState<Toast | null>(null);
+    [error, setError] = useState<string | null>(null);
   const dataRef = useRef(data);
-  const noticeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const generation = useRef(0);
   dataRef.current = data;
-  function notify(message: string, type: Toast["type"] = "success") {
-    if (noticeTimer.current) clearTimeout(noticeTimer.current);
-    setToast({ message, type });
-    noticeTimer.current = setTimeout(() => setToast(null), 5000);
-  }
-  async function reload() {
+  const userRef = useRef(user);
+  userRef.current = user;
+  const reload = useCallback(async () => {
     const current = ++generation.current;
     setLoading(true);
     setError(null);
-    if (isLocalDemoUser(user)) {
+    if (isLocalDemoUser(userRef.current)) {
       const next = createLocalDemoData();
       setData(next);
       dataRef.current = next;
@@ -83,29 +77,29 @@ export function PortalProvider({ children }: { children: ReactNode }) {
     } finally {
       if (current === generation.current) setLoading(false);
     }
-  }
+  }, []);
   useEffect(() => {
     void reload();
     return () => {
       generation.current++;
-      if (noticeTimer.current) clearTimeout(noticeTimer.current);
     };
   }, [user?.id]);
-  async function save<K extends Resource>(
+  const save = useCallback(async function save<K extends Resource>(
     resource: K,
     id: number | undefined,
     payload: Partial<Entity<K>>,
   ): Promise<Entity<K>> {
-    if (!user) throw new Error("Faça login para continuar.");
+    const u = userRef.current;
+    if (!u) throw new Error("Faça login para continuar.");
     if (
       (resource === "usuarios" || resource === "perfis") &&
-      !isAdministrador(user, dataRef.current)
+      !isAdministrador(u, dataRef.current)
     )
       throw new Error(
         "Somente o administrador pode alterar usuários e perfis.",
       );
     if (resource === "utilizacoes") {
-      const previous = dataRef.current.utilizacoes.find((u) => u.id === id);
+      const previous = dataRef.current.utilizacoes.find((x) => x.id === id);
       const update = payload as Partial<PortalData["utilizacoes"][number]>;
       if (
         !previous ||
@@ -123,7 +117,7 @@ export function PortalProvider({ children }: { children: ReactNode }) {
     }
     const currentData = dataRef.current;
     const rows = currentData[resource] as Entity<K>[];
-    const result = isLocalDemoUser(user)
+    const result = isLocalDemoUser(u)
       ? saveLocalDemoEntity(rows, id, payload)
       : await saveResource(resource, id, payload);
     const next = {
@@ -136,19 +130,13 @@ export function PortalProvider({ children }: { children: ReactNode }) {
     dataRef.current = next;
     setData(next);
     return result;
-  }
+  }, []);
+  const value = useMemo<Portal>(
+    () => ({ data, loading, error, reload, save }),
+    [data, loading, error, reload, save],
+  );
   return (
-    <Context.Provider
-      value={{
-        data,
-        loading,
-        error,
-        toast,
-        notify,
-        reload,
-        save,
-      }}
-    >
+    <Context.Provider value={value}>
       {children}
     </Context.Provider>
   );
