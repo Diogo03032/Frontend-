@@ -36,10 +36,24 @@ const navigation = [
   { to: "/relatorios", label: "Relatórios", icon: ChartNoAxesCombined },
   { to: "/perfis", label: "Configurações", icon: ShieldCheck },
 ];
+const helpByPage: Record<string, string> = {
+  "/": "Confira os indicadores e ajuste o período para comparar utilizações.",
+  "/colaboradores": "Consulte colaboradores e mantenha seus dados e vínculos atualizados.",
+  "/beneficios": "Cadastre benefícios e confira quais conveniados estão associados.",
+  "/conveniados": "Mantenha os dados dos estabelecimentos e seus usuários responsáveis.",
+  "/utilizacoes": "Acompanhe as solicitações e confira os detalhes antes de agir.",
+  "/campanhas": "Consulte campanhas e eventos, seus benefícios e respectivos status.",
+  "/relatorios": "Use os filtros disponíveis para consultar os dados do período desejado.",
+  "/perfis": "Gerencie usuários e permissões. A criação de contas é restrita ao administrador.",
+  "/meu-perfil": "Confira os dados da sua conta e o perfil de acesso atual.",
+};
 export default function Layout() {
   const { user, logout } = useAuth();
   const location = useLocation();
   const { loading, error, reload, toast, data } = usePortal();
+  const pageHelp =
+    helpByPage[location.pathname] ??
+    "Use o menu para acessar cadastros, utilizações e relatórios do portal.";
   const [open, setOpen] = useState(false),
     [collapsed, setCollapsed] = useState(false),
     [help, setHelp] = useState(false),
@@ -103,7 +117,7 @@ export default function Layout() {
             ))}
         </nav>
         <div className="sidebar-bottom">
-          <button className="sidebar-help" type="button" onClick={() => setHelp(!help)}><HelpCircle size={20} />Ajuda</button>
+          <button className="sidebar-help" type="button" aria-expanded={help} aria-controls="page-help" onClick={() => setHelp(!help)}><HelpCircle size={20} />Ajuda</button>
           <div className="sidebar-user">
             <Link to="/meu-perfil" className="sidebar-profile-link" aria-label="Abrir meu perfil" aria-current={location.pathname === "/meu-perfil" ? "page" : undefined} onClick={() => { setOpen(false); setHelp(false); }}>
               <span className="avatar" aria-hidden="true">{initials(user!.nome)}</span>
@@ -162,19 +176,18 @@ export default function Layout() {
           </div>
         </header>
         <main id="main" className="page-content" tabIndex={-1}>
-          {help && (
-            <section className="inline-notice">
-              <h2>Sobre o portal FCV</h2>
-              <p>
-                Use o menu para gerenciar cadastros, acompanhar utilizações e
-                consultar relatórios. Dados do aplicativo e do terminal são
-                administrados pela API central.
-              </p>
-              <button className="button-link" onClick={() => setHelp(false)}>
-                Fechar orientação
-              </button>
-            </section>
-          )}
+          <section
+            id="page-help"
+            className="inline-notice"
+            aria-label="Ajuda desta página"
+            hidden={!help}
+          >
+            <h2>Ajuda desta página</h2>
+            <p>{pageHelp}</p>
+            <button className="button-link" onClick={() => setHelp(false)}>
+              Fechar orientação
+            </button>
+          </section>
           {loading ? (
             <div className="loading-state" role="status">
               <span className="spinner" />

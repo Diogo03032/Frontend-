@@ -342,6 +342,10 @@
   border-color: #d4e7fb;
 }
 
+.app-shell #page-help {
+  margin-top: 18px;
+}
+
 .modal {
   border-radius: 18px;
   border-color: #dce8f4;
