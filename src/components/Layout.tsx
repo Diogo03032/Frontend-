@@ -18,7 +18,11 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../viewmodels/AuthContext";
 import { usePortal } from "../viewmodels/PortalContext";
-import { initials, isAdministrador } from "../models/selectors";
+import {
+  capitalizeFirstLetter,
+  initials,
+  isAdministrador,
+} from "../models/selectors";
 import Brand from "./Brand";
 import PortalSearch from "./PortalSearch";
 import NotificationCenter from "./NotificationCenter";
@@ -103,7 +107,7 @@ export default function Layout() {
           <div className="sidebar-user">
             <Link to="/meu-perfil" className="sidebar-profile-link" aria-label="Abrir meu perfil" aria-current={location.pathname === "/meu-perfil" ? "page" : undefined} onClick={() => { setOpen(false); setHelp(false); }}>
               <span className="avatar" aria-hidden="true">{initials(user!.nome)}</span>
-              <div><strong>{user!.nome}</strong><small>{admin ? "Administrador FCV" : "Operador FCV"}</small></div>
+              <div><strong>{capitalizeFirstLetter(user!.nome)}</strong><small>{admin ? "Administrador FCV" : "Operador FCV"}</small></div>
             </Link>
             <button
               className="icon-button"
@@ -153,7 +157,7 @@ export default function Layout() {
             <NotificationCenter />
             <Link to="/meu-perfil" className="profile-link" aria-label="Abrir meu perfil" aria-current={location.pathname === "/meu-perfil" ? "page" : undefined}>
               <span className="avatar small" aria-hidden="true">{initials(user!.nome)}</span>
-              <div className="topbar-identity"><strong>{user!.nome}</strong><small>{admin ? "Administrador" : "Operador"}</small></div>
+              <div className="topbar-identity"><strong>{capitalizeFirstLetter(user!.nome)}</strong><small>{admin ? "Administrador" : "Operador"}</small></div>
             </Link>
           </div>
         </header>

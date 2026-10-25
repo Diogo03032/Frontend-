@@ -3,7 +3,11 @@ import { ArrowLeft, Mail, ShieldCheck, UserRound } from "lucide-react";
 import { Badge, DetailList, PageHeader } from "../components/ui";
 import { useAuth } from "../viewmodels/AuthContext";
 import { usePortal } from "../viewmodels/PortalContext";
-import { formatDate, initials } from "../models/selectors";
+import {
+  capitalizeFirstLetter,
+  formatDate,
+  initials,
+} from "../models/selectors";
 
 const roleLabels: Record<string, string> = {
   FCV_ADMINISTRADOR: "Administrador FCV",
@@ -27,7 +31,7 @@ export default function MeuPerfil() {
     <div className="profile-layout">
       <section className="panel profile-summary" aria-labelledby="profile-name">
         <span className="profile-avatar" aria-hidden="true">{initials(account.nome)}</span>
-        <h2 id="profile-name">{account.nome}</h2>
+        <h2 id="profile-name">{capitalizeFirstLetter(account.nome)}</h2>
         <p className="profile-role"><ShieldCheck size={16} aria-hidden="true" />{role}</p>
         <Badge status={account.status} />
         <p className="profile-email"><Mail size={16} aria-hidden="true" />{account.email}</p>
@@ -36,7 +40,7 @@ export default function MeuPerfil() {
         <div className="panel-header"><h2 id="profile-data-title"><UserRound size={19} aria-hidden="true" />Dados da conta</h2></div>
         <div className="profile-details-body">
           <DetailList items={[
-            { label: "Nome completo", value: account.nome },
+            { label: "Nome completo", value: capitalizeFirstLetter(account.nome) },
             { label: "E-mail", value: account.email },
             { label: "Perfil de acesso", value: role },
             { label: "Status da conta", value: <Badge status={account.status} /> },

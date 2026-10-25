@@ -45,6 +45,7 @@ thead { background: #f2f8fd; }
 .page-footer { color: #869fb7; }
 .login-page { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(440px, .92fr); min-height: 100vh; min-height: 100svh; background: #fff; }
 .login-form-side { padding: 48px clamp(32px, 6vw, 92px); display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 0; }
+.login-form-side, .login-panel, .login-form-content, .login-form-content form { background: #fff; box-shadow: none; }
 .login-panel { width: min(100%, 400px); }
 .login-panel > .brand { width: min(100%, 270px); padding: 0; margin: 0 auto 46px; }
 .login-form-content { margin: 0; width: 100%; max-width: 420px; }
@@ -58,9 +59,17 @@ thead { background: #f2f8fd; }
 .login-forgot, .login-recovery-back { display: inline-flex; align-items: center; gap: 7px; margin-top: 12px; padding: 7px 0; background: transparent; color: #376da4; font-size: 13px; font-weight: 600; }
 .login-forgot { display: flex; margin: -4px 0 10px auto; }
 .login-forgot:hover, .login-recovery-back:hover { color: #174b85; text-decoration: underline; text-underline-offset: 3px; }
-.login-input { min-height: 54px; border-radius: 8px; padding: 0 14px; gap: 12px; color: #54738e; background: #fff; border: 1px solid #d5dee6; transition: border-color .18s, box-shadow .18s; }
+.login-input { min-height: 54px; border-radius: 8px; padding: 0 14px; gap: 12px; color: #54738e; background: #fff; border: 1px solid #d5dee6; box-shadow: none; transition: border-color .18s, box-shadow .18s; }
 .login-input:focus-within { border-color: #6978a8; box-shadow: 0 0 0 3px #28377214; }
 .login-input input { font-size: 15px; min-height: 52px; }
+.login-input input:-webkit-autofill,
+.login-input input:-webkit-autofill:hover,
+.login-input input:-webkit-autofill:focus,
+.login-input input:autofill {
+  -webkit-box-shadow: 0 0 0 1000px #fff inset !important;
+  -webkit-text-fill-color: #202d5c !important;
+  caret-color: #202d5c;
+}
 .login-input > svg { width: 19px; height: 19px; flex-shrink: 0; }
 .login-input input::placeholder { color: #8391a0; }
 .login-input .icon-button { color: #75889a; background: transparent; }

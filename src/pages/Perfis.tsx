@@ -25,7 +25,11 @@ import {
 } from "../components/ui";
 import { useAuth } from "../viewmodels/AuthContext";
 import { usePortal } from "../viewmodels/PortalContext";
-import { formatDate, isAdministrador } from "../models/selectors";
+import {
+  capitalizeFirstLetter,
+  formatDate,
+  isAdministrador,
+} from "../models/selectors";
 import { isLocalDemoUser } from "../local-demo/localDemo";
 import type { Escopo, Perfil, Usuario } from "../models/types";
 
@@ -181,7 +185,7 @@ export default function Perfis() {
     setUserForm(
       item
         ? {
-            nome: item.nome,
+            nome: capitalizeFirstLetter(item.nome),
             email: item.email,
             perfil_id: String(item.perfil_id),
             status: item.status,
@@ -267,7 +271,7 @@ export default function Perfis() {
       setFormError("Somente o administrador FCV pode alterar usuários.");
       return;
     }
-    const name = userForm.nome.trim();
+    const name = capitalizeFirstLetter(userForm.nome.trim());
     const email = userForm.email.trim().toLocaleLowerCase("pt-BR");
     if (!name || !email || !userForm.perfil_id) {
       setFormError("Preencha nome, e-mail e perfil de acesso.");
@@ -634,7 +638,7 @@ export default function Perfis() {
                 render: (item) => (
                   <div>
                     <div className="cell-title">
-                      {item.nome}
+                      {capitalizeFirstLetter(item.nome)}
                       {item.id === user?.id ? " · Você" : ""}
                     </div>
                     <div className="cell-subtitle">{item.email}</div>
@@ -674,7 +678,7 @@ export default function Perfis() {
                     <button
                       className="icon-button"
                       title="Visualizar usuário"
-                      aria-label={`Visualizar usuário ${item.nome}`}
+                      aria-label={`Visualizar usuário ${capitalizeFirstLetter(item.nome)}`}
                       onClick={() => setUserDetails(item)}
                     >
                       <Eye size={17} />
@@ -682,7 +686,7 @@ export default function Perfis() {
                     <button
                       className="icon-button"
                       title="Editar usuário"
-                      aria-label={`Editar usuário ${item.nome}`}
+                      aria-label={`Editar usuário ${capitalizeFirstLetter(item.nome)}`}
                       onClick={() => openUser(item)}
                     >
                       <Pencil size={17} />
@@ -691,7 +695,7 @@ export default function Perfis() {
                       <button
                         className="icon-button"
                         title="Inativar usuário"
-                        aria-label={`Inativar usuário ${item.nome}`}
+                        aria-label={`Inativar usuário ${capitalizeFirstLetter(item.nome)}`}
                         onClick={() =>
                           setInactivating({ type: "usuario", item })
                         }
@@ -883,7 +887,7 @@ export default function Perfis() {
                 autoComplete="name"
                 value={userForm.nome}
                 onChange={(event) => {
-                  const value = event.currentTarget.value;
+                  const value = capitalizeFirstLetter(event.currentTarget.value);
                   setUserForm((current) => ({
                     ...current,
                     nome: value,
@@ -1066,7 +1070,7 @@ export default function Perfis() {
       {userDetails && (
         <Modal
           title="Detalhes do usuário"
-          description={userDetails.nome}
+          description={capitalizeFirstLetter(userDetails.nome)}
           onClose={() => setUserDetails(undefined)}
         >
           <DetailList
@@ -1127,7 +1131,7 @@ export default function Perfis() {
       {inactivating && (
         <ConfirmModal
           title={`Inativar ${inactivating.type === "perfil" ? "perfil" : "usuário"}`}
-          description={`Deseja inativar ${inactivating.item.nome}? ${inactivating.type === "perfil" ? "O perfil deixará de estar disponível para novas contas. Os vínculos existentes serão preservados." : "O login desta conta será bloqueado. Os cadastros e históricos vinculados serão preservados."}`}
+          description={`Deseja inativar ${inactivating.type === "usuario" ? capitalizeFirstLetter(inactivating.item.nome) : inactivating.item.nome}? ${inactivating.type === "perfil" ? "O perfil deixará de estar disponível para novas contas. Os vínculos existentes serão preservados." : "O login desta conta será bloqueado. Os cadastros e históricos vinculados serão preservados."}`}
           onClose={() => {
             if (!submitting) setInactivating(undefined);
           }}

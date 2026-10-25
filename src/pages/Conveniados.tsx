@@ -22,7 +22,11 @@ import {
   StatCard,
 } from "../components/ui";
 import { usePortal } from "../viewmodels/PortalContext";
-import { conveniadoDaUtilizacao, formatCnpj } from "../models/selectors";
+import {
+  capitalizeFirstLetter,
+  conveniadoDaUtilizacao,
+  formatCnpj,
+} from "../models/selectors";
 import type { Conveniado } from "../models/types";
 
 const PAGE_SIZE = 8;
@@ -454,7 +458,7 @@ export default function Conveniados() {
                 <option value="">Selecione o usuário</option>
                 {availableUsers.map((user) => (
                   <option key={user.id} value={user.id}>
-                    {user.nome} · {user.email}
+                    {capitalizeFirstLetter(user.nome)} · {user.email}
                   </option>
                 ))}
               </select>

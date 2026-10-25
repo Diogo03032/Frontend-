@@ -22,7 +22,11 @@ import {
   StatCard,
 } from "../components/ui";
 import { usePortal } from "../viewmodels/PortalContext";
-import { colaboradorNome, formatDate } from "../models/selectors";
+import {
+  capitalizeFirstLetter,
+  colaboradorNome,
+  formatDate,
+} from "../models/selectors";
 import type { Colaborador } from "../models/types";
 
 const PAGE_SIZE = 8;
@@ -378,7 +382,7 @@ export default function Colaboradores() {
                 <option value="">Selecione o usuário</option>
                 {availableUsers.map((user) => (
                   <option key={user.id} value={user.id}>
-                    {user.nome} · {user.email}
+                    {capitalizeFirstLetter(user.nome)} · {user.email}
                   </option>
                 ))}
               </select>
