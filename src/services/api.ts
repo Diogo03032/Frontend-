@@ -101,7 +101,7 @@ export function saveResource<K extends Resource>(
   return request<Entity<K>>(
     `/${endpoints[resource]}${id !== undefined ? `/${id}` : ""}`,
     {
-      method: id !== undefined ? "PUT" : "POST",
+      method: id !== undefined ? "PATCH" : "POST",
       body: JSON.stringify(payload),
     },
   );
