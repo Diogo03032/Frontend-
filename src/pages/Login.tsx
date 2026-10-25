@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Navigate } from "react-router-dom";
 import { ArrowRight, Eye, EyeOff, LockKeyhole, UserRound, ShieldCheck } from "lucide-react";
 import { useAuth } from "../viewmodels/AuthContext";
+import PasswordRecovery from "./PasswordRecovery";
 import Brand from "../components/Brand";
 import LocalDemoAccessButton from "../local-demo/LocalDemoAccessButton";
 import loginIllustration from "../images/login/Ilustraçãofcv.svg";
@@ -12,6 +13,7 @@ export default function Login() {
   const [visible, setVisible] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [recovering, setRecovering] = useState(false);
   async function submit(event: FormEvent) {
     event.preventDefault();
     if (busy) return;
@@ -30,6 +32,7 @@ export default function Login() {
       <div className="login-panel">
         <Brand />
         <div className="login-form-content">
+          {recovering ? <PasswordRecovery defaultEmail={email} onBack={() => setRecovering(false)} /> : <>
           <h1 id="login-title">Acesse sua conta</h1>
           <p>Entre com seus dados para continuar.</p>
           <form onSubmit={submit} aria-busy={busy}>
@@ -42,7 +45,9 @@ export default function Login() {
             {error && <p className="form-error" role="alert">{error}</p>}
             <button className="btn btn-primary login-submit" disabled={busy}>{busy ? "Entrando…" : "Entrar"}<ArrowRight size={23} /></button>
           </form>
+          <button className="login-forgot" type="button" onClick={() => { setError(""); setRecovering(true); }}>Esqueci minha senha</button>
           <LocalDemoAccessButton disabled={busy} onAccess={loginLocal} />
+          </>}
           <div className="login-security"><ShieldCheck size={29} /><span>Ambiente seguro</span></div>
         </div>
       </div>

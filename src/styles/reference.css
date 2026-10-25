@@ -53,6 +53,11 @@ thead { background: #f2f8fd; }
 .login-form-content > p { font-size: 15px; line-height: 1.6; color: #718198; margin-bottom: 30px; }
 .login-form-content form { gap: 16px; }
 .login-field { display: block; }
+.login-recovery form { display: grid; gap: 14px; }
+.login-recovery input { width: 100%; min-height: 54px; border-radius: 10px; }
+.login-forgot, .login-recovery-back { display: inline-flex; align-items: center; gap: 7px; margin-top: 12px; padding: 7px 0; background: transparent; color: #376da4; font-size: 13px; font-weight: 600; }
+.login-forgot { display: flex; margin: -4px 0 10px auto; }
+.login-forgot:hover, .login-recovery-back:hover { color: #174b85; text-decoration: underline; text-underline-offset: 3px; }
 .login-input { min-height: 54px; border-radius: 8px; padding: 0 14px; gap: 12px; color: #54738e; background: #fff; border: 1px solid #d5dee6; transition: border-color .18s, box-shadow .18s; }
 .login-input:focus-within { border-color: #6978a8; box-shadow: 0 0 0 3px #28377214; }
 .login-input input { font-size: 15px; min-height: 52px; }

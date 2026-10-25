@@ -82,6 +82,9 @@ export async function loginApi(email: string, senha: string) {
   setToken(result.token);
   return result.usuario;
 }
+export const requestPasswordReset = (email: string) => request<{ mensagem: string; codigo: string }>("/auth/esqueci-senha", { method: "POST", body: JSON.stringify({ email }) });
+export const verifyPasswordResetCode = (email: string, codigo: string) => request<{ mensagem: string }>("/auth/redefinir-senha", { method: "POST", body: JSON.stringify({ email, codigo, validar_codigo: true }) });
+export const resetPassword = (email: string, codigo: string, nova_senha: string) => request<{ mensagem: string }>("/auth/redefinir-senha", { method: "POST", body: JSON.stringify({ email, codigo, nova_senha }) });
 export const getCurrentUser = () => request<SessionUser>("/auth/eu");
 export const hasToken = () => Boolean(token);
 export function listResource<K extends Resource>(
