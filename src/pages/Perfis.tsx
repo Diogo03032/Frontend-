@@ -26,6 +26,7 @@ import {
 import { useAuth } from "../viewmodels/AuthContext";
 import { usePortal } from "../viewmodels/PortalContext";
 import { formatDate, isAdministrador } from "../models/selectors";
+import { isLocalDemoUser } from "../local-demo/localDemo";
 import type { Escopo, Perfil, Usuario } from "../models/types";
 
 const PAGE_SIZE = 8;
@@ -319,7 +320,14 @@ export default function Perfis() {
         ...(userForm.senha ? { senha: userForm.senha } : {}),
       };
       await save("usuarios", editingUser?.id, payload);
-      notify(editingUser ? "Usuário atualizado." : "Usuário cadastrado.");
+      notify(
+        isLocalDemoUser(user)
+          ? "Usuário salvo apenas na demonstração. Não foi enviado à API e será removido ao atualizar a página."
+          : editingUser
+            ? "Usuário atualizado."
+            : "Usuário cadastrado.",
+        isLocalDemoUser(user) ? "info" : "success",
+      );
       setUserFormOpen(false);
       setUserForm(blankUser());
     } catch (error) {
@@ -397,6 +405,13 @@ export default function Perfis() {
           </button>
         }
       />
+      {isLocalDemoUser(user) && (
+        <p className="inline-notice" role="status">
+          Você está usando a demonstração local. Cadastros feitos aqui não são
+          enviados à API nem gravados no banco de dados; eles são reiniciados
+          quando a página é atualizada.
+        </p>
+      )}
       <div className="stats-grid">
         <StatCard
           label="Perfis de acesso"

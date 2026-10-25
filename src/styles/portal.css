@@ -1,17 +1,17 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;450;500;550;600;650;700;750&display=swap");
 :root {
   font-family: "DM Sans", "Segoe UI", Arial, sans-serif;
-  color: #153a67;
+  color: #283772;
   background: #f4f8fd;
   font-synthesis: none;
   font-weight: 400;
-  --primary: #0759c7;
-  --navy: #0d3261;
-  --muted: #778ba4;
-  --stroke: #e4edf7;
-  --canvas: #f4f8fd;
+  --primary: #283772;
+  --navy: #202d5c;
+  --muted: #737f9c;
+  --stroke: #e2e6f0;
+  --canvas: #f5f6fa;
   --green: #149b72;
-  --purple: #8554cd;
+  --purple: #6575ae;
   --amber: #dc941e;
   --danger: #d8526c;
   line-height: 1.5;
@@ -54,7 +54,7 @@ a:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 3px solid #91bffd;
+  outline: 3px solid #aeb8d5;
   outline-offset: 3px;
 }
 input,
@@ -212,10 +212,10 @@ small {
   min-height: 32px;
   border-radius: 7px;
   background: #eff5fc;
-  color: #4c77a8;
+  color: var(--primary);
 }
 .icon-button:hover {
-  background: #e0edfc;
+  background: #edf0f8;
   color: var(--primary);
 }
 .icon-button.danger {
@@ -277,20 +277,20 @@ small {
   height: 22px;
 }
 .stat-icon.blue {
-  background: #e9f2ff;
-  color: #2370d1;
+  background: #edf0f8;
+  color: #283772;
 }
 .stat-icon.green {
-  background: #e7f7ef;
-  color: #219b75;
+  background: #edf0f8;
+  color: #283772;
 }
 .stat-icon.purple {
-  background: #f1eafa;
-  color: #8a5acd;
+  background: #edf0f8;
+  color: #283772;
 }
 .stat-icon.amber {
-  background: #fff4df;
-  color: #d6941c;
+  background: #edf0f8;
+  color: #283772;
 }
 .stat-content {
   min-width: 0;
@@ -410,11 +410,11 @@ small {
   stroke-width: 1.75;
 }
 .nav-link:hover {
-  background: #f5f8fc;
+  background: #f2f3f8;
   color: var(--primary);
 }
 .nav-link.active {
-  background: #eaf3ff;
+  background: #edf0f8;
   color: var(--primary);
   font-weight: 650;
 }
@@ -785,16 +785,19 @@ tbody tr:hover {
   max-width: 400px;
 }
 .modal {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   border: 1px solid #e4edf7;
   padding: 0;
   border-radius: 14px;
   width: min(560px, calc(100vw - 32px));
-  max-height: 90vh;
+  max-height: calc(100svh - 40px);
   color: var(--navy);
   box-shadow: 0 20px 90px #16396035;
 }
 .modal.modal-wide {
-  width: min(740px, calc(100vw - 32px));
+  width: min(1040px, calc(100vw - 48px));
 }
 .modal::backdrop {
   background: #11325762;
@@ -816,15 +819,67 @@ tbody tr:hover {
   color: #8395ad;
   margin: 5px 0 0;
 }
+.modal-scroll-region {
+  position: relative;
+  display: flex;
+  flex: 0 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
 .modal-body {
+  flex: 0 1 auto;
+  min-height: 0;
   padding: 24px 25px;
-  max-height: calc(90vh - 95px);
+  max-height: none;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  touch-action: pan-y;
+}
+.modal-body::-webkit-scrollbar {
+  display: none;
+}
+.modal-body.is-dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+.modal-scroll-cue {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 38px;
+  padding-top: 12px;
+  color: #7185a3;
+  background: linear-gradient(180deg, #ffffff00 0%, #fff 72%);
+  font-size: 11px;
+  font-weight: 500;
+  pointer-events: none;
+}
+.modal-scroll-cue svg {
+  animation: modal-scroll-cue-bob 1.6s ease-in-out infinite;
+}
+@keyframes modal-scroll-cue-bob {
+  50% { transform: translateY(3px); }
 }
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
+}
+.modal-wide .form-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px 18px;
+}
+@media (max-width: 900px) {
+  .modal-wide .form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 .field {
   display: flex;
@@ -1041,10 +1096,10 @@ tbody tr:hover {
   stroke-dasharray: 3 4;
 }
 .chart-area {
-  fill: #edf5ff;
+  fill: #edf0f8;
 }
 .chart-line {
-  stroke: #2c7ddc;
+  stroke: #283772;
   stroke-width: 2.5;
   fill: none;
   stroke-linecap: round;
@@ -1052,7 +1107,7 @@ tbody tr:hover {
 }
 .chart-dot {
   fill: white;
-  stroke: #2c7ddc;
+  stroke: #283772;
   stroke-width: 2.5;
 }
 .chart-legend {
@@ -1066,7 +1121,7 @@ tbody tr:hover {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #2c7ddc;
+  background: #283772;
 }
 .chart-caption {
   font-size: 9px;
@@ -1096,8 +1151,8 @@ tbody tr:hover {
   color: #3a6390;
 }
 .rank {
-  background: #eaf3ff;
-  color: #5789c2;
+  background: #edf0f8;
+  color: #283772;
   display: inline-flex;
   width: 21px;
   height: 21px;
@@ -1107,12 +1162,12 @@ tbody tr:hover {
   font-size: 10px;
 }
 .rank-1 {
-  background: #e8f6f0;
-  color: #419b7a;
+  background: #e4e8f4;
+  color: #3b4b86;
 }
 .rank-2 {
-  background: #f1ebfb;
-  color: #956ccd;
+  background: #dce1f0;
+  color: #4f6098;
 }
 .bar-track {
   height: 6px;
@@ -1123,23 +1178,23 @@ tbody tr:hover {
 .bar-fill {
   height: 100%;
   border-radius: 10px;
-  background: #4486d7;
+  background: #283772;
   min-width: 0;
 }
 .bar-fill.green,
 .bar-color-1 {
-  background: #48b69a;
+  background: #3b4b86;
 }
 .bar-fill.purple,
 .bar-color-2 {
-  background: #a081d6;
+  background: #6575ae;
 }
 .bar-fill.amber,
 .bar-color-3 {
-  background: #e7b557;
+  background: #8391c0;
 }
 .bar-fill.blue {
-  background: #4486d7;
+  background: #283772;
 }
 .recent-list {
   padding: 0 24px 10px;
@@ -1161,8 +1216,8 @@ tbody tr:hover {
   border-radius: 9px;
   width: 34px;
   height: 34px;
-  background: #edf4fc;
-  color: #5991ce;
+  background: #edf0f8;
+  color: #283772;
   flex-shrink: 0;
 }
 .recent-row > div {
@@ -1747,7 +1802,7 @@ tbody tr:hover {
   color: #40a083;
 }
 .visual-benefit {
-  background: #0759b9;
+  background: var(--primary);
   padding: 27px 28px;
   border-radius: 14px;
   transform: rotate(2deg);
@@ -2086,8 +2141,14 @@ tbody tr:hover {
   .permission-grid {
     grid-template-columns: 1fr;
   }
+  .modal-wide .form-grid {
+    grid-template-columns: 1fr;
+  }
   .modal-body {
     padding: 20px;
+  }
+  .modal {
+    max-height: calc(100svh - 24px);
   }
   .modal-header {
     padding: 18px 20px;

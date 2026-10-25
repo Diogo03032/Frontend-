@@ -32,7 +32,7 @@ export default function Dashboard() {
   const report = buildReport({...data, utilizacoes:usages}, first, today);
   const byBenefit = report.benefits.map(item => ({name:item.nome, count:item.count}));
   const least = [...byBenefit].sort((a,b) => a.count-b.count).slice(0,3);
-  const colors = ["#0874db", "#23b797", "#ffd150", "#a477df", "#ed6798", "#65bfea"];
+  const colors = ["#283772", "#3b4b86", "#4f6098", "#6575ae", "#8391c0", "#a7b1d2"];
   let offset = 0;
   const stops = report.categories.map((item,index) => {
     const start = offset;

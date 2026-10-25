@@ -1,5 +1,5 @@
 /* Visual da referencia WEB.pdf; dados e comandos permanecem na API. */
-:root { --primary: #005ac8; --navy: #06366b; --muted: #728ba3; --canvas: #f3f9fd; --stroke: #e2edf5; background: var(--canvas); }
+:root { --primary: #283772; --navy: #202d5c; --muted: #737f9c; --canvas: #f5f6fa; --stroke: #e2e6f0; background: var(--canvas); }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 .brand img { display: block; width: 100%; height: auto; }
 .brand-compact img { width: 224px; max-width: 100%; }
@@ -54,15 +54,15 @@ thead { background: #f2f8fd; }
 .login-form-content form { gap: 16px; }
 .login-field { display: block; }
 .login-input { min-height: 54px; border-radius: 8px; padding: 0 14px; gap: 12px; color: #54738e; background: #fff; border: 1px solid #d5dee6; transition: border-color .18s, box-shadow .18s; }
-.login-input:focus-within { border-color: #5387b2; box-shadow: 0 0 0 3px #145da014; }
+.login-input:focus-within { border-color: #6978a8; box-shadow: 0 0 0 3px #28377214; }
 .login-input input { font-size: 15px; min-height: 52px; }
 .login-input > svg { width: 19px; height: 19px; flex-shrink: 0; }
 .login-input input::placeholder { color: #8391a0; }
 .login-input .icon-button { color: #75889a; background: transparent; }
 .login-input .icon-button:hover { color: #145da0; background: #f2f6f9; }
 .login-submit { margin-top: 4px; justify-content: center; gap: 12px; border-radius: 8px; height: 52px; font-size: 15px; font-weight: 600; box-shadow: none; }
-.login-submit.btn-primary { background: #145da0; transition: background .18s, transform .18s, box-shadow .18s; }
-.login-submit.btn-primary:hover { background: #104f89; box-shadow: 0 4px 12px #104f8926; }
+.login-submit.btn-primary { background: var(--primary); transition: background .18s, transform .18s, box-shadow .18s; }
+.login-submit.btn-primary:hover { background: #202d5c; box-shadow: 0 4px 12px #28377226; }
 .login-submit.btn-secondary { color: #315574; border-color: #d5dee6; }
 .login-security { color: #6c7e8f; font-size: 12px; margin-top: 22px; gap: 9px; }
 .login-security svg { width: 19px; height: 19px; color: #3e7996; }

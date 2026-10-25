@@ -42,7 +42,6 @@ export default function Layout() {
     [desktop, setDesktop] = useState(() =>
       window.matchMedia("(min-width: 801px)").matches,
     );
-  const sidebarRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     const media = window.matchMedia("(min-width: 801px)");
@@ -50,22 +49,6 @@ export default function Layout() {
     media.addEventListener("change", updateDesktop);
     return () => media.removeEventListener("change", updateDesktop);
   }, []);
-  useEffect(() => {
-    function closeSidebarOnOutsideClick(event: PointerEvent) {
-      if (
-        desktop &&
-        !collapsed &&
-        event.target instanceof Node &&
-        !sidebarRef.current?.contains(event.target) &&
-        !menuButtonRef.current?.contains(event.target)
-      ) {
-        setCollapsed(true);
-      }
-    }
-    document.addEventListener("pointerdown", closeSidebarOnOutsideClick);
-    return () =>
-      document.removeEventListener("pointerdown", closeSidebarOnOutsideClick);
-  }, [collapsed, desktop]);
   const admin = isAdministrador(user!, data);
   return (
     <div className={`app-shell ${collapsed ? "sidebar-collapsed" : ""}`}>
@@ -73,15 +56,10 @@ export default function Layout() {
         Pular para conteúdo
       </a>
       {open && (
-        <button
-          className="sidebar-scrim"
-          aria-label="Fechar menu"
-          onClick={() => setOpen(false)}
-        />
+        <div className="sidebar-scrim" aria-hidden="true" />
       )}
       <aside
         id="main-sidebar"
-        ref={sidebarRef}
         className={`sidebar ${open ? "open" : ""}`}
         inert={desktop && collapsed}
       >
@@ -141,11 +119,11 @@ export default function Layout() {
               aria-label={
                 desktop
                   ? collapsed
-                    ? "Expandir menu"
-                    : "Recolher menu"
+                    ? "Abrir menu lateral"
+                    : "Fechar menu lateral"
                   : open
-                    ? "Fechar menu"
-                    : "Abrir menu"
+                    ? "Fechar menu lateral"
+                    : "Abrir menu lateral"
               }
               aria-controls="main-sidebar"
               aria-expanded={desktop ? !collapsed : open}
@@ -157,7 +135,12 @@ export default function Layout() {
                 }
               }}
             >
-              {open ? <X /> : <Menu />}
+              {(desktop ? !collapsed : open) ? <X /> : <Menu />}
+              <span className="menu-toggle-tooltip" aria-hidden="true">
+                {(desktop ? !collapsed : open)
+                  ? "Fechar menu lateral"
+                  : "Abrir menu lateral"}
+              </span>
             </button>
             <PortalSearch />
           </div>
