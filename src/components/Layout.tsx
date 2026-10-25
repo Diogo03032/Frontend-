@@ -56,7 +56,12 @@ export default function Layout() {
         Pular para conteúdo
       </a>
       {open && (
-        <div className="sidebar-scrim" aria-hidden="true" />
+        <button
+          className="sidebar-scrim"
+          type="button"
+          aria-label="Fechar menu lateral"
+          onClick={() => setOpen(false)}
+        />
       )}
       <aside
         id="main-sidebar"

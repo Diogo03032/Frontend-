@@ -882,9 +882,13 @@ export default function Perfis() {
                 maxLength={150}
                 autoComplete="name"
                 value={userForm.nome}
-                onChange={(event) =>
-                  setUserForm({ ...userForm, nome: event.target.value })
-                }
+                onChange={(event) => {
+                  const value = event.currentTarget.value;
+                  setUserForm((current) => ({
+                    ...current,
+                    nome: value,
+                  }));
+                }}
                 placeholder="Nome do usuário"
               />
             </Field>
@@ -895,9 +899,13 @@ export default function Perfis() {
                 maxLength={150}
                 autoComplete="email"
                 value={userForm.email}
-                onChange={(event) =>
-                  setUserForm({ ...userForm, email: event.target.value })
-                }
+                onChange={(event) => {
+                  const value = event.currentTarget.value;
+                  setUserForm((current) => ({
+                    ...current,
+                    email: value,
+                  }));
+                }}
                 placeholder="nome@exemplo.com.br"
               />
             </Field>
@@ -906,9 +914,13 @@ export default function Perfis() {
                 required
                 disabled={editingSelf}
                 value={userForm.perfil_id}
-                onChange={(event) =>
-                  setUserForm({ ...userForm, perfil_id: event.target.value })
-                }
+                onChange={(event) => {
+                  const value = event.currentTarget.value;
+                  setUserForm((current) => ({
+                    ...current,
+                    perfil_id: value,
+                  }));
+                }}
               >
                 <option value="">Selecione o perfil</option>
                 {availableProfiles.map((profile) => (
@@ -923,12 +935,13 @@ export default function Perfis() {
               <select
                 disabled={editingSelf}
                 value={userForm.status}
-                onChange={(event) =>
-                  setUserForm({
-                    ...userForm,
-                    status: event.target.value as Usuario["status"],
-                  })
-                }
+                onChange={(event) => {
+                  const value = event.currentTarget.value as Usuario["status"];
+                  setUserForm((current) => ({
+                    ...current,
+                    status: value,
+                  }));
+                }}
               >
                 <option value="ATIVO">Ativo</option>
                 <option value="INATIVO">Inativo</option>
@@ -950,9 +963,13 @@ export default function Perfis() {
                   minLength={8}
                   autoComplete="new-password"
                   value={userForm.senha}
-                  onChange={(event) =>
-                    setUserForm({ ...userForm, senha: event.target.value })
-                  }
+                  onChange={(event) => {
+                    const value = event.currentTarget.value.replace(/^\s+/, "");
+                    setUserForm((current) => ({
+                      ...current,
+                      senha: value,
+                    }));
+                  }}
                   placeholder={
                     editingUser
                       ? "Preencha somente para alterar"

@@ -431,9 +431,13 @@ export default function Colaboradores() {
                 type="tel"
                 maxLength={20}
                 value={form.telefone}
-                onChange={(event) =>
-                  setForm({ ...form, telefone: event.target.value })
-                }
+                onChange={(event) => {
+                  const telefone = event.currentTarget.value.replace(
+                    /[^\d+()\s-]/g,
+                    "",
+                  );
+                  setForm((current) => ({ ...current, telefone }));
+                }}
                 placeholder="(32) 99999-9999"
               />
             </Field>

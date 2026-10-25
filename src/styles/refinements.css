@@ -238,24 +238,75 @@
 .app-shell .portal-search:focus-within,
 .app-shell .search-field:focus-within {
   border-color: #4c8bd4;
-  box-shadow: 0 0 0 3px #0874db0f;
-  outline: 2px solid #9fc9f4;
-  outline-offset: 1px;
+  box-shadow: 0 0 0 4px #4c8bd41a, 0 2px 5px #17395f0a;
 }
 
 .app-shell .field :is(input, select, textarea),
 .modal .field :is(input, select, textarea),
 .app-shell .filters > select {
-  border-radius: 10px;
+  border-radius: 11px;
   border-color: #dce6f0;
-  transition: border-color 160ms, box-shadow 160ms;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease;
 }
 
 .app-shell .field :is(input, select, textarea):focus,
 .modal .field :is(input, select, textarea):focus,
 .app-shell .filters > select:focus {
   border-color: #4c8bd4;
-  box-shadow: 0 0 0 3px #0874db0b;
+  background-color: #fcfdff;
+  box-shadow: 0 0 0 4px #4c8bd41a, 0 2px 5px #17395f0a;
+}
+
+.field > span {
+  display: flex;
+  align-items: center;
+  transition: color 180ms ease;
+}
+
+.field > span::before {
+  width: 6px;
+  height: 6px;
+  margin-right: 7px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #63a4e8, #345fbd);
+  content: "";
+  opacity: 0;
+  transform: scale(.55);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.field:focus-within > span {
+  color: #345fbd;
+}
+
+.field:focus-within > span::before {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.app-shell .field :is(input, select, textarea):focus-visible,
+.modal .field :is(input, select, textarea):focus-visible,
+.app-shell .filters > select:focus-visible,
+.app-shell .search-field input:focus-visible,
+.login-input input:focus-visible {
+  outline: none;
+}
+
+.login-input {
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.login-input:focus-within {
+  border-color: #4c8bd4;
+  box-shadow: 0 0 0 4px #4c8bd41a, 0 2px 5px #17395f0a;
+}
+
+.login-input:focus-within > svg {
+  color: #4c8bd4;
+  transition: color 180ms ease;
 }
 
 .app-shell .portal-search-results {

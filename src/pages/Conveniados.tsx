@@ -412,9 +412,13 @@ export default function Conveniados() {
                 maxLength={18}
                 inputMode="numeric"
                 value={form.cnpj}
-                onChange={(event) =>
-                  setForm({ ...form, cnpj: event.target.value })
-                }
+                onChange={(event) => {
+                  const cnpj = event.currentTarget.value.replace(
+                    /[^\d./-]/g,
+                    "",
+                  );
+                  setForm((current) => ({ ...current, cnpj }));
+                }}
                 placeholder="00.000.000/0000-00"
               />
             </Field>
