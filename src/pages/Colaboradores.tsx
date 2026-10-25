@@ -1,4 +1,3 @@
-import { useState, type FormEvent } from "react";
 import {
   Eye,
   Pencil,
@@ -21,162 +20,15 @@ import {
   SearchField,
   StatCard,
 } from "../components/ui";
-import { usePortal } from "../viewmodels/PortalContext";
 import {
   capitalizeFirstLetter,
   colaboradorNome,
   formatDate,
 } from "../models/selectors";
-import type { Colaborador } from "../models/types";
-
-const PAGE_SIZE = 8;
-type ColaboradorForm = {
-  usuario_id: string;
-  matricula: string;
-  setor: string;
-  cargo: string;
-  data_admissao: string;
-  telefone: string;
-  status: Colaborador["status"];
-};
-const blankForm = (): ColaboradorForm => ({
-  usuario_id: "",
-  matricula: "",
-  setor: "",
-  cargo: "",
-  data_admissao: "",
-  telefone: "",
-  status: "ATIVO",
-});
+import { useColaboradoresVM } from "../viewmodels/useColaboradoresVM";
 
 export default function Colaboradores() {
-  const { data, save, notify, loading } = usePortal();
-  const [search, setSearch] = useState(() => new URLSearchParams(window.location.search).get("buscar") ?? "");
-  const [status, setStatus] = useState("");
-  const [setor, setSetor] = useState("");
-  const [page, setPage] = useState(1);
-  const [formOpen, setFormOpen] = useState(false);
-  const [editing, setEditing] = useState<Colaborador>();
-  const [details, setDetails] = useState<Colaborador>();
-  const [inactivating, setInactivating] = useState<Colaborador>();
-  const [form, setForm] = useState<ColaboradorForm>(blankForm);
-  const [formError, setFormError] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const sectors = [
-    ...new Set(data.colaboradores.map((item) => item.setor)),
-  ].sort();
-  const availableUsers = data.usuarios.filter(
-    (user) =>
-      (user.id === editing?.usuario_id ||
-        data.perfis.find((profile) => profile.id === user.perfil_id)?.escopo ===
-          "COLABORADOR") &&
-      !data.colaboradores.some(
-        (item) => item.usuario_id === user.id && item.id !== editing?.id,
-      ),
-  );
-  const filtered = data.colaboradores.filter((item) => {
-    const user = data.usuarios.find((entry) => entry.id === item.usuario_id);
-    const text =
-      `${colaboradorNome(data, item.id)} ${user?.email ?? ""} ${item.matricula} ${item.setor} ${item.cargo}`.toLocaleLowerCase(
-        "pt-BR",
-      );
-    return (
-      (!status || item.status === status) &&
-      (!setor || item.setor === setor) &&
-      text.includes(search.trim().toLocaleLowerCase("pt-BR"))
-    );
-  });
-  const currentPage = Math.min(
-    page,
-    Math.max(1, Math.ceil(filtered.length / PAGE_SIZE)),
-  );
-  const visibleRows = filtered.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE,
-  );
-
-  function openForm(item?: Colaborador) {
-    setEditing(item);
-    setForm(
-      item
-        ? {
-            usuario_id: String(item.usuario_id),
-            matricula: item.matricula,
-            setor: item.setor,
-            cargo: item.cargo,
-            data_admissao: item.data_admissao.slice(0, 10),
-            telefone: item.telefone ?? "",
-            status: item.status,
-          }
-        : blankForm(),
-    );
-    setFormError("");
-    setFormOpen(true);
-  }
-
-  async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setFormError("");
-    if (!form.usuario_id) {
-      setFormError("Selecione um usuário para vincular ao colaborador.");
-      return;
-    }
-    if (
-      [form.matricula, form.setor, form.cargo].some((value) => !value.trim())
-    ) {
-      setFormError("Preencha os campos obrigatórios com dados válidos.");
-      return;
-    }
-    if (
-      data.colaboradores.some(
-        (item) =>
-          item.id !== editing?.id &&
-          item.matricula.toLocaleLowerCase("pt-BR") ===
-            form.matricula.trim().toLocaleLowerCase("pt-BR"),
-      )
-    ) {
-      setFormError("Esta matrícula já está cadastrada.");
-      return;
-    }
-    setSubmitting(true);
-    try {
-      await save("colaboradores", editing?.id, {
-        ...form,
-        usuario_id: Number(form.usuario_id),
-        matricula: form.matricula.trim(),
-        setor: form.setor.trim(),
-        cargo: form.cargo.trim(),
-        telefone: form.telefone.trim() || null,
-      });
-      notify(editing ? "Colaborador atualizado." : "Colaborador cadastrado.");
-      setFormOpen(false);
-    } catch (error) {
-      setFormError(
-        error instanceof Error
-          ? error.message
-          : "Não foi possível salvar o colaborador.",
-      );
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  async function inactivate() {
-    if (!inactivating) return;
-    setSubmitting(true);
-    try {
-      await save("colaboradores", inactivating.id, { status: "INATIVO" });
-      notify("Colaborador inativado. O histórico foi preservado.");
-      setInactivating(undefined);
-    } catch (error) {
-      notify(
-        error instanceof Error ? error.message : "Não foi possível inativar.",
-        "error",
-      );
-    } finally {
-      setSubmitting(false);
-    }
-  }
+  const vm = useColaboradoresVM();
 
   return (
     <>
@@ -187,8 +39,8 @@ export default function Colaboradores() {
         actions={
           <button
             className="btn btn-primary"
-            disabled={loading}
-            onClick={() => openForm()}
+            disabled={vm.loading}
+            onClick={() => vm.openForm()}
           >
             <Plus size={18} /> Novo colaborador
           </button>
@@ -197,14 +49,14 @@ export default function Colaboradores() {
       <div className="stats-grid">
         <StatCard
           label="Total de colaboradores"
-          value={data.colaboradores.length}
+          value={vm.data.colaboradores.length}
           icon={<Users size={21} />}
           detail="Cadastros na plataforma"
         />
         <StatCard
           label="Colaboradores ativos"
           value={
-            data.colaboradores.filter((item) => item.status === "ATIVO").length
+            vm.data.colaboradores.filter((item) => item.status === "ATIVO").length
           }
           icon={<UserCheck size={21} />}
           tone="green"
@@ -213,7 +65,7 @@ export default function Colaboradores() {
         <StatCard
           label="Colaboradores afastados"
           value={
-            data.colaboradores.filter((item) => item.status === "AFASTADO")
+            vm.data.colaboradores.filter((item) => item.status === "AFASTADO")
               .length
           }
           icon={<UserRoundCheck size={21} />}
@@ -223,7 +75,7 @@ export default function Colaboradores() {
         <StatCard
           label="Colaboradores inativos"
           value={
-            data.colaboradores.filter((item) => item.status === "INATIVO")
+            vm.data.colaboradores.filter((item) => item.status === "INATIVO")
               .length
           }
           icon={<UserMinus size={21} />}
@@ -234,19 +86,19 @@ export default function Colaboradores() {
       <section className="panel" aria-label="Lista de colaboradores">
         <div className="filters">
           <SearchField
-            value={search}
+            value={vm.search}
             onChange={(value) => {
-              setSearch(value);
-              setPage(1);
+              vm.setSearch(value);
+              vm.setPage(1);
             }}
             placeholder="Buscar por nome, matrícula, setor ou cargo..."
           />
           <select
             aria-label="Filtrar colaboradores por status"
-            value={status}
+            value={vm.status}
             onChange={(event) => {
-              setStatus(event.target.value);
-              setPage(1);
+              vm.setStatus(event.target.value);
+              vm.setPage(1);
             }}
           >
             <option value="">Todos os status</option>
@@ -256,21 +108,21 @@ export default function Colaboradores() {
           </select>
           <select
             aria-label="Filtrar por setor"
-            value={setor}
+            value={vm.setor}
             onChange={(event) => {
-              setSetor(event.target.value);
-              setPage(1);
+              vm.setSetor(event.target.value);
+              vm.setPage(1);
             }}
           >
             <option value="">Todos os setores</option>
-            {sectors.map((value) => (
+            {vm.sectors.map((value) => (
               <option key={value}>{value}</option>
             ))}
           </select>
         </div>
-        {filtered.length ? (
+        {vm.filtered.length ? (
           <DataTable
-            rows={visibleRows}
+            rows={vm.visibleRows}
             getRowKey={(item) => item.id}
             columns={[
               {
@@ -279,7 +131,7 @@ export default function Colaboradores() {
                 render: (item) => (
                   <div>
                     <div className="cell-title">
-                      {colaboradorNome(data, item.id)}
+                      {colaboradorNome(vm.data, item.id)}
                     </div>
                     <div className="cell-subtitle">{item.cargo}</div>
                   </div>
@@ -311,16 +163,16 @@ export default function Colaboradores() {
                     <button
                       className="icon-button"
                       title="Visualizar colaborador"
-                      aria-label={`Visualizar ${colaboradorNome(data, item.id)}`}
-                      onClick={() => setDetails(item)}
+                      aria-label={`Visualizar ${colaboradorNome(vm.data, item.id)}`}
+                      onClick={() => vm.setDetails(item)}
                     >
                       <Eye size={17} />
                     </button>
                     <button
                       className="icon-button"
                       title="Editar colaborador"
-                      aria-label={`Editar ${colaboradorNome(data, item.id)}`}
-                      onClick={() => openForm(item)}
+                      aria-label={`Editar ${colaboradorNome(vm.data, item.id)}`}
+                      onClick={() => vm.openForm(item)}
                     >
                       <Pencil size={17} />
                     </button>
@@ -328,8 +180,8 @@ export default function Colaboradores() {
                       <button
                         className="icon-button"
                         title="Inativar colaborador"
-                        aria-label={`Inativar ${colaboradorNome(data, item.id)}`}
-                        onClick={() => setInactivating(item)}
+                        aria-label={`Inativar ${colaboradorNome(vm.data, item.id)}`}
+                        onClick={() => vm.setInactivating(item)}
                       >
                         <UserMinus size={17} />
                       </button>
@@ -342,7 +194,7 @@ export default function Colaboradores() {
         ) : (
           <EmptyState
             title={
-              loading
+              vm.loading
                 ? "Carregando colaboradores..."
                 : "Nenhum colaborador encontrado"
             }
@@ -350,23 +202,23 @@ export default function Colaboradores() {
           />
         )}
         <Pagination
-          page={currentPage}
-          total={filtered.length}
-          pageSize={PAGE_SIZE}
-          onChange={setPage}
+          page={vm.currentPage}
+          total={vm.filtered.length}
+          pageSize={vm.PAGE_SIZE}
+          onChange={vm.setPage}
         />
       </section>
 
-      {formOpen && (
+      {vm.formOpen && (
         <Modal
-          title={editing ? "Editar colaborador" : "Novo colaborador"}
+          title={vm.editing ? "Editar colaborador" : "Novo colaborador"}
           description="Vincule uma conta existente e preencha os dados de trabalho."
           onClose={() => {
-            if (!submitting) setFormOpen(false);
+            if (!vm.submitting) vm.setFormOpen(false);
           }}
           wide
         >
-          <form onSubmit={submit} className="form-grid">
+          <form onSubmit={vm.submit} className="form-grid">
             <Field
               label="Usuário vinculado"
               required
@@ -374,13 +226,13 @@ export default function Colaboradores() {
             >
               <select
                 required
-                value={form.usuario_id}
+                value={vm.form.usuario_id}
                 onChange={(event) =>
-                  setForm({ ...form, usuario_id: event.target.value })
+                  vm.setForm({ ...vm.form, usuario_id: event.target.value })
                 }
               >
                 <option value="">Selecione o usuário</option>
-                {availableUsers.map((user) => (
+                {vm.availableUsers.map((user) => (
                   <option key={user.id} value={user.id}>
                     {capitalizeFirstLetter(user.nome)} · {user.email}
                   </option>
@@ -391,9 +243,9 @@ export default function Colaboradores() {
               <input
                 required
                 maxLength={30}
-                value={form.matricula}
+                value={vm.form.matricula}
                 onChange={(event) =>
-                  setForm({ ...form, matricula: event.target.value })
+                  vm.setForm({ ...vm.form, matricula: event.target.value })
                 }
                 placeholder="Ex.: FCV-0124"
               />
@@ -402,9 +254,9 @@ export default function Colaboradores() {
               <input
                 required
                 maxLength={100}
-                value={form.setor}
+                value={vm.form.setor}
                 onChange={(event) =>
-                  setForm({ ...form, setor: event.target.value })
+                  vm.setForm({ ...vm.form, setor: event.target.value })
                 }
                 placeholder="Ex.: Enfermagem"
               />
@@ -413,9 +265,9 @@ export default function Colaboradores() {
               <input
                 required
                 maxLength={100}
-                value={form.cargo}
+                value={vm.form.cargo}
                 onChange={(event) =>
-                  setForm({ ...form, cargo: event.target.value })
+                  vm.setForm({ ...vm.form, cargo: event.target.value })
                 }
                 placeholder="Ex.: Enfermeiro(a)"
               />
@@ -424,9 +276,9 @@ export default function Colaboradores() {
               <input
                 type="date"
                 required
-                value={form.data_admissao}
+                value={vm.form.data_admissao}
                 onChange={(event) =>
-                  setForm({ ...form, data_admissao: event.target.value })
+                  vm.setForm({ ...vm.form, data_admissao: event.target.value })
                 }
               />
             </Field>
@@ -434,24 +286,24 @@ export default function Colaboradores() {
               <input
                 type="tel"
                 maxLength={20}
-                value={form.telefone}
+                value={vm.form.telefone}
                 onChange={(event) => {
                   const telefone = event.currentTarget.value.replace(
                     /[^\d+()\s-]/g,
                     "",
                   );
-                  setForm((current) => ({ ...current, telefone }));
+                  vm.setForm({ ...vm.form, telefone });
                 }}
                 placeholder="(32) 99999-9999"
               />
             </Field>
             <Field label="Status" required>
               <select
-                value={form.status}
+                value={vm.form.status}
                 onChange={(event) =>
-                  setForm({
-                    ...form,
-                    status: event.target.value as Colaborador["status"],
+                  vm.setForm({
+                    ...vm.form,
+                    status: event.target.value as typeof vm.form.status,
                   })
                 }
               >
@@ -460,34 +312,34 @@ export default function Colaboradores() {
                 <option value="INATIVO">Inativo</option>
               </select>
             </Field>
-            {!availableUsers.length && (
+            {!vm.availableUsers.length && (
               <p className="full-width inline-notice">
                 Não há uma conta do perfil Colaborador sem vínculo. Solicite ao
                 administrador o cadastro em Perfis e usuários.
               </p>
             )}
-            {formError && (
+            {vm.formError && (
               <p className="full-width form-error" role="alert">
-                {formError}
+                {vm.formError}
               </p>
             )}
             <div className="modal-footer full-width">
               <button
                 type="button"
                 className="btn btn-secondary"
-                disabled={submitting}
-                onClick={() => setFormOpen(false)}
+                disabled={vm.submitting}
+                onClick={() => vm.setFormOpen(false)}
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 className="btn btn-primary"
-                disabled={submitting || !availableUsers.length}
+                disabled={vm.submitting || !vm.availableUsers.length}
               >
-                {submitting
+                {vm.submitting
                   ? "Salvando..."
-                  : editing
+                  : vm.editing
                     ? "Salvar alterações"
                     : "Cadastrar colaborador"}
               </button>
@@ -495,30 +347,30 @@ export default function Colaboradores() {
           </form>
         </Modal>
       )}
-      {details && (
+      {vm.details && (
         <Modal
           title="Detalhes do colaborador"
-          description={colaboradorNome(data, details.id)}
-          onClose={() => setDetails(undefined)}
+          description={colaboradorNome(vm.data, vm.details.id)}
+          onClose={() => vm.setDetails(undefined)}
         >
           <DetailList
             items={[
-              { label: "Status", value: <Badge status={details.status} /> },
-              { label: "Matrícula", value: details.matricula },
-              { label: "Setor", value: details.setor },
-              { label: "Cargo", value: details.cargo },
-              { label: "Admissão", value: formatDate(details.data_admissao) },
-              { label: "Telefone", value: details.telefone || "Não informado" },
+              { label: "Status", value: <Badge status={vm.details.status} /> },
+              { label: "Matrícula", value: vm.details.matricula },
+              { label: "Setor", value: vm.details.setor },
+              { label: "Cargo", value: vm.details.cargo },
+              { label: "Admissão", value: formatDate(vm.details.data_admissao) },
+              { label: "Telefone", value: vm.details.telefone || "Não informado" },
               {
                 label: "E-mail",
                 value:
-                  data.usuarios.find((user) => user.id === details.usuario_id)
+                  vm.data.usuarios.find((user) => user.id === vm.details!.usuario_id)
                     ?.email || "Usuário não disponível",
               },
               {
                 label: "Registros de utilização",
-                value: data.utilizacoes.filter(
-                  (item) => item.colaborador_id === details.id,
+                value: vm.data.utilizacoes.filter(
+                  (item) => item.colaborador_id === vm.details!.id,
                 ).length,
               },
             ]}
@@ -526,15 +378,15 @@ export default function Colaboradores() {
           <div className="modal-footer">
             <button
               className="btn btn-secondary"
-              onClick={() => setDetails(undefined)}
+              onClick={() => vm.setDetails(undefined)}
             >
               Fechar
             </button>
             <button
               className="btn btn-primary"
               onClick={() => {
-                openForm(details);
-                setDetails(undefined);
+                vm.openForm(vm.details);
+                vm.setDetails(undefined);
               }}
             >
               <Pencil size={16} /> Editar cadastro
@@ -542,15 +394,15 @@ export default function Colaboradores() {
           </div>
         </Modal>
       )}
-      {inactivating && (
+      {vm.inactivating && (
         <ConfirmModal
           title="Inativar colaborador"
-          description={`Deseja inativar ${colaboradorNome(data, inactivating.id)}? O acesso aos benefícios será bloqueado e os registros anteriores serão preservados.`}
+          description={`Deseja inativar ${colaboradorNome(vm.data, vm.inactivating.id)}? O acesso aos benefícios será bloqueado e os registros anteriores serão preservados.`}
           onClose={() => {
-            if (!submitting) setInactivating(undefined);
+            if (!vm.submitting) vm.setInactivating(undefined);
           }}
-          onConfirm={inactivate}
-          confirming={submitting}
+          onConfirm={vm.inactivate}
+          confirming={vm.submitting}
           confirmLabel="Confirmar inativação"
           confirmingLabel="Inativando..."
         />
