@@ -15,7 +15,7 @@ import {
   CheckCircle2,
   AlertCircle,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../viewmodels/AuthContext";
 import { usePortal } from "../viewmodels/PortalContext";
 import { initials, isAdministrador } from "../models/selectors";
@@ -37,10 +37,38 @@ export default function Layout() {
   const location = useLocation();
   const { loading, error, reload, toast, data } = usePortal();
   const [open, setOpen] = useState(false),
-    [help, setHelp] = useState(false);
+    [collapsed, setCollapsed] = useState(false),
+    [help, setHelp] = useState(false),
+    [desktop, setDesktop] = useState(() =>
+      window.matchMedia("(min-width: 801px)").matches,
+    );
+  const sidebarRef = useRef<HTMLElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 801px)");
+    const updateDesktop = () => setDesktop(media.matches);
+    media.addEventListener("change", updateDesktop);
+    return () => media.removeEventListener("change", updateDesktop);
+  }, []);
+  useEffect(() => {
+    function closeSidebarOnOutsideClick(event: PointerEvent) {
+      if (
+        desktop &&
+        !collapsed &&
+        event.target instanceof Node &&
+        !sidebarRef.current?.contains(event.target) &&
+        !menuButtonRef.current?.contains(event.target)
+      ) {
+        setCollapsed(true);
+      }
+    }
+    document.addEventListener("pointerdown", closeSidebarOnOutsideClick);
+    return () =>
+      document.removeEventListener("pointerdown", closeSidebarOnOutsideClick);
+  }, [collapsed, desktop]);
   const admin = isAdministrador(user!, data);
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${collapsed ? "sidebar-collapsed" : ""}`}>
       <a className="skip-link" href="#main">
         Pular para conteúdo
       </a>
@@ -51,7 +79,12 @@ export default function Layout() {
           onClick={() => setOpen(false)}
         />
       )}
-      <aside className={`sidebar ${open ? "open" : ""}`}>
+      <aside
+        id="main-sidebar"
+        ref={sidebarRef}
+        className={`sidebar ${open ? "open" : ""}`}
+        inert={desktop && collapsed}
+      >
         <Link to="/" className="brand-link" onClick={() => setOpen(false)}>
           <Brand compact />
         </Link>
@@ -103,9 +136,26 @@ export default function Layout() {
         <header className="topbar">
           <div className="topbar-left">
             <button
-              className="icon-button mobile-menu"
-              aria-label={open ? "Fechar menu" : "Abrir menu"}
-              onClick={() => setOpen(!open)}
+              ref={menuButtonRef}
+              className="icon-button menu-toggle"
+              aria-label={
+                desktop
+                  ? collapsed
+                    ? "Expandir menu"
+                    : "Recolher menu"
+                  : open
+                    ? "Fechar menu"
+                    : "Abrir menu"
+              }
+              aria-controls="main-sidebar"
+              aria-expanded={desktop ? !collapsed : open}
+              onClick={() => {
+                if (desktop) {
+                  setCollapsed(!collapsed);
+                } else {
+                  setOpen(!open);
+                }
+              }}
             >
               {open ? <X /> : <Menu />}
             </button>

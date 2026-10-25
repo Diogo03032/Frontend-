@@ -448,3 +448,43 @@
     transform: none;
   }
 }
+
+.app-shell .menu-toggle {
+  display: inline-flex;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  padding: 8px;
+  color: #71869a;
+  background: transparent;
+}
+
+.app-shell .menu-toggle > svg {
+  width: 19px;
+  height: 19px;
+}
+
+.app-shell .menu-toggle:hover:not(:disabled) {
+  color: #345f82;
+  background: #f3f7fa;
+}
+
+@media (min-width: 801px) {
+  .app-shell .sidebar,
+  .app-shell .main-shell {
+    transition:
+      transform 180ms var(--motion-ease),
+      margin-left 180ms var(--motion-ease),
+      width 180ms var(--motion-ease);
+  }
+
+  .app-shell.sidebar-collapsed .sidebar {
+    transform: translateX(-101%);
+    pointer-events: none;
+  }
+
+  .app-shell.sidebar-collapsed .main-shell {
+    width: 100%;
+    margin-left: 0;
+  }
+}
