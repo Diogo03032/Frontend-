@@ -1,8 +1,7 @@
-import { useId, useState, type ChangeEvent, type KeyboardEvent } from "react";
+import { useId, useMemo, useState, type ChangeEvent, type KeyboardEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, X } from "lucide-react";
 import { usePortal } from "../viewmodels/PortalContext";
-import { colaboradorNome } from "../models/selectors";
 export default function PortalSearch() {
   const { data } = usePortal();
   const navigate = useNavigate();
@@ -10,12 +9,31 @@ export default function PortalSearch() {
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const resultsId = useId();
-  const records = [
-    ...data.colaboradores.map(item => ({name:colaboradorNome(data,item.id),type:"Colaborador",path:"/colaboradores"})),
-    ...data.beneficios.map(item => ({name:item.nome,type:"Benefício",path:"/beneficios"})),
-    ...data.conveniados.map(item => ({name:item.nome_fantasia,type:"Conveniado",path:"/conveniados"})),
-    ...data.campanhas.map(item => ({name:item.nome,type:"Campanha / evento",path:"/campanhas"})),
-  ];
+  const records = useMemo(() => {
+    const usuariosMap = new Map(data.usuarios.map((u) => [u.id, u.nome]));
+    return [
+      ...data.colaboradores.map((item) => ({
+        name: usuariosMap.get(item.usuario_id) ?? `Colaborador #${item.id}`,
+        type: "Colaborador",
+        path: "/colaboradores",
+      })),
+      ...data.beneficios.map((item) => ({
+        name: item.nome,
+        type: "Benefício",
+        path: "/beneficios",
+      })),
+      ...data.conveniados.map((item) => ({
+        name: item.nome_fantasia || item.razao_social,
+        type: "Conveniado",
+        path: "/conveniados",
+      })),
+      ...data.campanhas.map((item) => ({
+        name: item.nome,
+        type: "Campanha / evento",
+        path: "/campanhas",
+      })),
+    ];
+  }, [data]);
   const term = query.trim().toLocaleLowerCase("pt-BR");
   const matches = term ? records.filter(item => item.name.toLocaleLowerCase("pt-BR").includes(term)).slice(0,8) : [];
   const expanded = open && Boolean(term);

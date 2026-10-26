@@ -60,10 +60,16 @@ export function useColaboradoresVM() {
       ),
   );
 
+  const usuariosMap = useMemo(
+    () => new Map(data.usuarios.map((u) => [u.id, u])),
+    [data.usuarios],
+  );
+
   const filtered = data.colaboradores.filter((item) => {
-    const user = data.usuarios.find((entry) => entry.id === item.usuario_id);
+    const user = usuariosMap.get(item.usuario_id);
+    const nome = user?.nome ?? `Colaborador #${item.id}`;
     const text =
-      `${colaboradorNome(data, item.id)} ${user?.email ?? ""} ${item.matricula} ${item.setor} ${item.cargo}`.toLocaleLowerCase(
+      `${nome} ${user?.email ?? ""} ${item.matricula} ${item.setor} ${item.cargo}`.toLocaleLowerCase(
         "pt-BR",
       );
     return (
