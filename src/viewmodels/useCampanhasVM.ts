@@ -64,6 +64,7 @@ export function useCampanhasVM() {
   const [partnerId, setPartnerId] = useState("");
   const [cancelTarget, setCancelTarget] = useState<Campanha | null>(null);
   const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState("");
 
   // ── Dados derivados ──
   const selected = data.campanhas.find((item) => item.id === selectedId);
@@ -143,6 +144,7 @@ export function useCampanhasVM() {
 
   // ── Ações ──
   function abrirForm(item?: Campanha) {
+    setFormError("");
     setEditing(item ?? null);
     setForm(
       item
@@ -162,6 +164,7 @@ export function useCampanhasVM() {
   }
 
   function abrirItem(item?: Item) {
+    setFormError("");
     setItemEditing(item ?? null);
     setItemForm(
       item
@@ -185,6 +188,7 @@ export function useCampanhasVM() {
     action: () => Promise<unknown>,
     message: string,
     after?: () => void,
+    onError?: (message: string) => void,
   ) {
     if (saving) return;
     setSaving(true);
@@ -193,12 +197,11 @@ export function useCampanhasVM() {
       notify(message, "success");
       after?.();
     } catch (error) {
-      notify(
-        error instanceof Error
-          ? error.message
-          : "Não foi possível salvar. Tente novamente.",
-        "error",
-      );
+      const errorMessage = error instanceof Error
+        ? error.message
+        : "Não foi possível salvar. Tente novamente.";
+      if (onError) onError(errorMessage);
+      else notify(errorMessage, "error");
     } finally {
       setSaving(false);
     }
@@ -206,12 +209,13 @@ export function useCampanhasVM() {
 
   async function submitCampanha(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setFormError("");
     if (form.data_fim < form.data_inicio) {
-      notify("A data final deve ser igual ou posterior à inicial.", "error");
+      setFormError("A data final deve ser igual ou posterior à inicial.");
       return;
     }
     if (!form.nome.trim()) {
-      notify("Informe o nome da campanha ou evento.", "error");
+      setFormError("Informe o nome da campanha ou evento.");
       return;
     }
     await execute(
@@ -229,21 +233,24 @@ export function useCampanhasVM() {
         ? "Campanha ou evento atualizado."
         : "Campanha ou evento cadastrado.",
       () => setShowForm(false),
+      setFormError,
     );
   }
 
   async function submitItem(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!selected || !itemForm.nome.trim()) return;
+    setFormError("");
+    if (!selected) return;
+    if (!itemForm.nome.trim()) {
+      setFormError("Informe o nome do item promocional.");
+      return;
+    }
     const valor = Number(itemForm.valor);
     if (
       valor <= 0 ||
       (itemForm.tipo_beneficio === "PERCENTUAL" && valor > 100)
     ) {
-      notify(
-        "Informe um valor válido. Percentuais devem ficar entre 0 e 100.",
-        "error",
-      );
+      setFormError("Informe um valor válido. Percentuais devem ficar entre 0 e 100.");
       return;
     }
     await execute(
@@ -262,11 +269,13 @@ export function useCampanhasVM() {
         }),
       itemEditing ? "Item atualizado." : "Item adicionado à campanha.",
       () => setShowItemForm(false),
+      setFormError,
     );
   }
 
   async function submitLink(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setFormError("");
     if (!linkItem || !partnerId) return;
     const existing = data.ofertasCampanha.find(
       (item) =>
@@ -285,6 +294,7 @@ export function useCampanhasVM() {
         setLinkItem(null);
         setPartnerId("");
       },
+      setFormError,
     );
   }
 
@@ -358,6 +368,8 @@ export function useCampanhasVM() {
 
     // loading
     saving,
+    formError,
+    setFormError,
     execute,
 
     // helpers re-exportados para o JSX

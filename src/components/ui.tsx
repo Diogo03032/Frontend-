@@ -569,6 +569,7 @@ export function Modal({
       aria-describedby={description ? `${id}-description` : undefined}
       onCancel={(e) => {
         e.preventDefault();
+        onClose();
       }}
       onSubmitCapture={(event) => {
         if (event.target instanceof HTMLFormElement) {

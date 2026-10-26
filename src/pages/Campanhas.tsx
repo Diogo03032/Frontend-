@@ -27,6 +27,7 @@ import {
   SearchField,
   StatCard,
 } from "../components/ui";
+import { ConfirmModal } from "../components/ConfirmModal";
 import {
   useCampanhasVM,
   TIPOS,
@@ -89,6 +90,8 @@ export default function Campanhas() {
     cancelTarget,
     setCancelTarget,
     saving,
+    formError,
+    setFormError,
     execute,
   } = useCampanhasVM();
 
@@ -401,6 +404,7 @@ export default function Campanhas() {
                         selected.status === "ENCERRADA"
                       }
                       onClick={() => {
+                        setFormError("");
                         setLinkItem(item);
                         setPartnerId("");
                       }}
@@ -558,6 +562,7 @@ export default function Campanhas() {
                 </Field>
               </div>
             </div>
+            {formError && <p className="full-width form-error" role="alert">{formError}</p>}
             <div className="modal-footer">
               <button
                 type="button"
@@ -687,6 +692,7 @@ export default function Campanhas() {
                 </Field>
               </div>
             </div>
+            {formError && <p className="full-width form-error" role="alert">{formError}</p>}
             <div className="modal-footer">
               <button
                 type="button"
@@ -741,6 +747,7 @@ export default function Campanhas() {
                   ))}
               </select>
             </Field>
+            {formError && <p className="form-error" role="alert">{formError}</p>}
             <div className="modal-footer">
               <button
                 type="button"
@@ -762,40 +769,26 @@ export default function Campanhas() {
         </Modal>
       )}
       {cancelTarget && (
-        <Modal
+        <ConfirmModal
           title="Cancelar campanha ou evento"
           description="O cadastro e o histórico de resgates serão preservados."
           onClose={() => {
             if (!saving) setCancelTarget(null);
           }}
+          onConfirm={() =>
+            execute(
+              () =>
+                save("campanhas", cancelTarget.id, { status: "CANCELADA" }),
+              "Iniciativa cancelada. Histórico preservado.",
+              () => setCancelTarget(null),
+            )
+          }
+          confirming={saving}
+          confirmLabel="Confirmar cancelamento"
+          confirmingLabel="Cancelando…"
         >
-          <p>
-            Confirma o cancelamento de <strong>{cancelTarget.nome}</strong>?
-          </p>
-          <div className="modal-footer">
-            <button
-              className="btn btn-secondary"
-              disabled={saving}
-              onClick={() => setCancelTarget(null)}
-            >
-              Voltar
-            </button>
-            <button
-              className="btn btn-danger"
-              disabled={saving}
-              onClick={() =>
-                execute(
-                  () =>
-                    save("campanhas", cancelTarget.id, { status: "CANCELADA" }),
-                  "Iniciativa cancelada. Histórico preservado.",
-                  () => setCancelTarget(null),
-                )
-              }
-            >
-              {saving ? "Cancelando…" : "Confirmar cancelamento"}
-            </button>
-          </div>
-        </Modal>
+          <p>Confirma o cancelamento de <strong>{cancelTarget.nome}</strong>?</p>
+        </ConfirmModal>
       )}
     </>
   );
