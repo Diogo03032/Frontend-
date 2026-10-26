@@ -22,7 +22,7 @@ import {
   SearchField,
   StatCard,
 } from "../components/ui";
-import { conveniadoNome, formatDate, formatMoney } from "../models/selectors";
+import { conveniadoNome, formatDate } from "../models/selectors";
 import type { Beneficio } from "../models/types";
 import {
   useBeneficiosVM,

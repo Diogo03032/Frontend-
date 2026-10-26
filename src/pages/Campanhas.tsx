@@ -32,7 +32,6 @@ import {
   useCampanhasVM,
   TIPOS,
   type Campanha,
-  type Item,
 } from "../viewmodels/useCampanhasVM";
 
 export default function Campanhas() {
@@ -50,9 +49,7 @@ export default function Campanhas() {
     setInicio,
     fim,
     setFim,
-    campaignPage,
     setCampaignPage,
-    eventPage,
     setEventPage,
     periodoInvalido,
     filter,
@@ -62,7 +59,6 @@ export default function Campanhas() {
     campaignList,
     eventList,
     selected,
-    selectedId,
     setSelectedId,
     campanhaItems,
     usosCampanha,

@@ -4,9 +4,6 @@ import { useToast } from "./ToastContext";
 import { buildReport } from "../models/reportSelectors";
 import { usePagination } from "../hooks/usePagination";
 import {
-  beneficioDaUtilizacao,
-  colaboradorNome,
-  conveniadoDaUtilizacao,
   createDataIndexes,
   colaboradorNomeIndexed,
   beneficioDaUtilizacaoIndexed,

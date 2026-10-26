@@ -1,7 +1,6 @@
 import type { PortalData, ReportResult, Utilizacao } from "./types";
 import {
   beneficioDaUtilizacao,
-  conveniadoDaUtilizacao,
   createDataIndexes,
   beneficioDaUtilizacaoIndexed,
   conveniadoDaUtilizacaoIndexed,

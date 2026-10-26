@@ -42,11 +42,6 @@ export interface Perfil {
   status: Status;
 }
 
-/**
- * @deprecated Use Perfil diretamente. Mantido por retrocompatibilidade.
- */
-export type PerfilAcesso = Perfil;
-
 export interface Colaborador {
   id: number;
   usuario_id: number;

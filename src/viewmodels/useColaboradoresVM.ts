@@ -1,7 +1,6 @@
 import { useMemo, useState, type FormEvent } from "react";
 import { usePortal } from "./PortalContext";
 import { useToast } from "./ToastContext";
-import { colaboradorNome } from "../models/selectors";
 import type { Colaborador } from "../models/types";
 import { usePagination } from "../hooks/usePagination";
 
