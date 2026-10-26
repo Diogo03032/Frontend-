@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { usePortal } from "./PortalContext";
 import { useToast } from "./ToastContext";
 import { colaboradorNome } from "../models/selectors";
@@ -47,17 +47,25 @@ export function useColaboradoresVM() {
   const [formError, setFormError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  // ── Dados derivados ──
-  const sectors = [...new Set(data.colaboradores.map((item) => item.setor))].sort();
+  // ── Dados derivados memoizados ──
+  const sectors = useMemo(
+    () =>
+      [...new Set(data.colaboradores.map((item) => item.setor).filter(Boolean))].sort(),
+    [data.colaboradores],
+  );
 
-  const availableUsers = data.usuarios.filter(
-    (user) =>
-      (user.id === editing?.usuario_id ||
-        data.perfis.find((profile) => profile.id === user.perfil_id)?.escopo ===
-          "COLABORADOR") &&
-      !data.colaboradores.some(
-        (item) => item.usuario_id === user.id && item.id !== editing?.id,
+  const availableUsers = useMemo(
+    () =>
+      data.usuarios.filter(
+        (user) =>
+          (user.id === editing?.usuario_id ||
+            data.perfis.find((profile) => profile.id === user.perfil_id)?.escopo ===
+              "COLABORADOR") &&
+          !data.colaboradores.some(
+            (item) => item.usuario_id === user.id && item.id !== editing?.id,
+          ),
       ),
+    [data.usuarios, data.perfis, data.colaboradores, editing?.id, editing?.usuario_id],
   );
 
   const usuariosMap = useMemo(
@@ -65,28 +73,36 @@ export function useColaboradoresVM() {
     [data.usuarios],
   );
 
-  const filtered = data.colaboradores.filter((item) => {
-    const user = usuariosMap.get(item.usuario_id);
-    const nome = user?.nome ?? `Colaborador #${item.id}`;
-    const text =
-      `${nome} ${user?.email ?? ""} ${item.matricula} ${item.setor} ${item.cargo}`.toLocaleLowerCase(
-        "pt-BR",
-      );
-    return (
-      (!status || item.status === status) &&
-      (!setor || item.setor === setor) &&
-      text.includes(search.trim().toLocaleLowerCase("pt-BR"))
-    );
-  });
+  const filtered = useMemo(
+    () =>
+      data.colaboradores.filter((item) => {
+        const user = usuariosMap.get(item.usuario_id);
+        const nome = user?.nome ?? `Colaborador #${item.id}`;
+        const text =
+          `${nome} ${user?.email ?? ""} ${item.matricula} ${item.setor} ${item.cargo}`.toLocaleLowerCase(
+            "pt-BR",
+          );
+        return (
+          (!status || item.status === status) &&
+          (!setor || item.setor === setor) &&
+          text.includes(search.trim().toLocaleLowerCase("pt-BR"))
+        );
+      }),
+    [data.colaboradores, usuariosMap, status, setor, search],
+  );
 
   const currentPage = Math.min(
     page,
     Math.max(1, Math.ceil(filtered.length / PAGE_SIZE)),
   );
 
-  const visibleRows = filtered.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE,
+  const visibleRows = useMemo(
+    () =>
+      filtered.slice(
+        (currentPage - 1) * PAGE_SIZE,
+        currentPage * PAGE_SIZE,
+      ),
+    [filtered, currentPage],
   );
 
   // ── Ações ──
