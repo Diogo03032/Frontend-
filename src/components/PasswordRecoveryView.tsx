@@ -1,9 +1,7 @@
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import type { usePasswordRecoveryVM } from "../viewmodels/usePasswordRecoveryVM";
 
-type Props = ReturnType<typeof usePasswordRecoveryVM>;
-
-export default function PasswordRecoveryView(props: Props) {
+export default function PasswordRecoveryView(props: ReturnType<typeof usePasswordRecoveryVM>) {
   const { step, email, code, password, busy, error, isDone, title, description, action, back, setEmail, setCode, setPassword, submit, goBack } = props;
   return <section className="login-recovery">
     <h1>{title}</h1><p>{description}</p>
