@@ -6,6 +6,10 @@ import {
   beneficioDaUtilizacao,
   colaboradorNome,
   conveniadoDaUtilizacao,
+  createDataIndexes,
+  colaboradorNomeIndexed,
+  beneficioDaUtilizacaoIndexed,
+  conveniadoDaUtilizacaoIndexed,
   formatDate,
   statusLabel,
 } from "../models/selectors";
@@ -63,12 +67,13 @@ export function useRelatoriosVM() {
       "Registro", "Data da solicitação", "Colaborador", "Benefício ou item",
       "Conveniado", "Valor aplicado (R$)", "Status", "Canal de validação", "Observações",
     ];
+    const indexes = createDataIndexes(data);
     const rows = report.filtered.map((usage) => [
       usage.id,
       formatDate(usage.data_solicitacao, true),
-      colaboradorNome(data, usage.colaborador_id),
-      beneficioDaUtilizacao(data, usage)?.nome ?? "Não encontrado",
-      conveniadoDaUtilizacao(data, usage)?.nome_fantasia ?? "Não encontrado",
+      colaboradorNomeIndexed(indexes, usage.colaborador_id),
+      beneficioDaUtilizacaoIndexed(indexes, usage)?.nome ?? "Não encontrado",
+      conveniadoDaUtilizacaoIndexed(indexes, usage)?.nome_fantasia ?? "Não encontrado",
       Number(usage.valor_aplicado).toFixed(2).replace(".", ","),
       statusLabel(usage.status),
       usage.canal_validacao ?? "",

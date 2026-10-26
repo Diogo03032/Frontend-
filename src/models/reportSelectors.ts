@@ -1,5 +1,11 @@
 import type { PortalData, ReportResult, Utilizacao } from "./types";
-import { beneficioDaUtilizacao, conveniadoDaUtilizacao } from "./selectors";
+import {
+  beneficioDaUtilizacao,
+  conveniadoDaUtilizacao,
+  createDataIndexes,
+  beneficioDaUtilizacaoIndexed,
+  conveniadoDaUtilizacaoIndexed,
+} from "./selectors";
 
 /**
  * Gera a chave única que identifica o benefício ou item de campanha de uma utilização.
@@ -73,12 +79,14 @@ export function buildReport(data: PortalData, inicio: string, fim: string): Repo
     : [];
 
   // Pré-agrupamento de utilizações aprovadas por chave de benefício e por conveniado (O(N))
+  const indexes = createDataIndexes(data);
   const usosPorBeneficioKey = new Map<string, Utilizacao[]>();
   const usosPorConveniadoId = new Map<number, Utilizacao[]>();
   const categoriaContagem: Record<string, number> = {};
 
   for (const uso of approved) {
-    const key = usoKey(data, uso);
+    const item = beneficioDaUtilizacaoIndexed(indexes, uso);
+    const key = `${uso.beneficio_conveniado_id ? "beneficio" : "campanha"}:${item?.id ?? "desconhecido"}`;
     const listaBeneficio = usosPorBeneficioKey.get(key);
     if (listaBeneficio) {
       listaBeneficio.push(uso);
@@ -86,7 +94,7 @@ export function buildReport(data: PortalData, inicio: string, fim: string): Repo
       usosPorBeneficioKey.set(key, [uso]);
     }
 
-    const parceiro = conveniadoDaUtilizacao(data, uso);
+    const parceiro = conveniadoDaUtilizacaoIndexed(indexes, uso);
     if (parceiro) {
       const listaConveniado = usosPorConveniadoId.get(parceiro.id);
       if (listaConveniado) {
