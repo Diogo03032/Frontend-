@@ -3,6 +3,7 @@ import { usePortal } from "./PortalContext";
 import { useToast } from "./ToastContext";
 import { conveniadoDaUtilizacao, formatCnpj } from "../models/selectors";
 import type { Conveniado } from "../models/types";
+import { usePagination } from "../hooks/usePagination";
 
 const PAGE_SIZE = 8;
 
@@ -36,7 +37,6 @@ export function useConveniadosVM() {
   );
   const [status, setStatus] = useState("");
   const [category, setCategory] = useState("");
-  const [page, setPage] = useState(1);
 
   // ── Modais / formulário ──
   const [formOpen, setFormOpen] = useState(false);
@@ -74,15 +74,14 @@ export function useConveniadosVM() {
     );
   });
 
-  const currentPage = Math.min(
-    page,
-    Math.max(1, Math.ceil(filtered.length / PAGE_SIZE)),
-  );
+  const {
+    page: currentPage,
+    setPage,
+    start,
+    end,
+  } = usePagination(filtered.length, PAGE_SIZE);
 
-  const visibleRows = filtered.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE,
-  );
+const visibleRows = filtered.slice(start, end);
 
   const activeOfferCount = (id: number) =>
     data.ofertas.filter(
@@ -195,7 +194,7 @@ export function useConveniadosVM() {
     setStatus,
     category,
     setCategory,
-    page,
+    page: currentPage,
     setPage,
     categories,
 

@@ -3,6 +3,7 @@ import { usePortal } from "./PortalContext";
 import { useToast } from "./ToastContext";
 import { colaboradorNome } from "../models/selectors";
 import type { Colaborador } from "../models/types";
+import { usePagination } from "../hooks/usePagination";
 
 const PAGE_SIZE = 8;
 
@@ -36,7 +37,6 @@ export function useColaboradoresVM() {
   );
   const [status, setStatus] = useState("");
   const [setor, setSetor] = useState("");
-  const [page, setPage] = useState(1);
 
   // ── Modais / formulário ──
   const [formOpen, setFormOpen] = useState(false);
@@ -91,18 +91,16 @@ export function useColaboradoresVM() {
     [data.colaboradores, usuariosMap, status, setor, search],
   );
 
-  const currentPage = Math.min(
-    page,
-    Math.max(1, Math.ceil(filtered.length / PAGE_SIZE)),
-  );
+  const {
+    page: currentPage,
+    setPage,
+    start,
+    end,
+  } = usePagination(filtered.length, PAGE_SIZE);
 
   const visibleRows = useMemo(
-    () =>
-      filtered.slice(
-        (currentPage - 1) * PAGE_SIZE,
-        currentPage * PAGE_SIZE,
-      ),
-    [filtered, currentPage],
+    () => filtered.slice(start, end),
+    [filtered, start, end],
   );
 
   // ── Ações ──
@@ -202,7 +200,7 @@ export function useColaboradoresVM() {
     setStatus,
     setor,
     setSetor,
-    page,
+    page: currentPage,
     setPage,
     sectors,
 

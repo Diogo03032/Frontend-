@@ -2,6 +2,7 @@ import { useMemo, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePortal } from "./PortalContext";
 import { useToast } from "./ToastContext";
+import { usePagination } from "../hooks/usePagination";
 import {
   beneficioDaUtilizacao,
   colaboradorNome,
@@ -32,7 +33,6 @@ export function useUtilizacoesVM() {
   const [colaborador, setColaborador] = useState("");
   const [conveniado, setConveniado] = useState("");
   const [beneficio, setBeneficio] = useState("");
-  const [page, setPage] = useState(1);
 
   // ── Modais ──
   const [selected, setSelected] = useState<Utilizacao | null>(() => {
@@ -115,15 +115,20 @@ export function useUtilizacoesVM() {
     periodoInvalido,
   ]);
 
-  const aprovadas = rows.filter((uso) => uso.status === "APROVADA");
-  const pageCount = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
-  const currentPage = Math.min(page, pageCount);
+    const aprovadas = rows.filter((uso) => uso.status === "APROVADA");
+    const {
+    page: currentPage,
+    setPage,
+    start,
+    end,
+  } = usePagination(rows.length, PAGE_SIZE);
+
   const visibleRows = useMemo(
     () =>
       [...rows]
         .sort((a, b) => b.data_solicitacao.localeCompare(a.data_solicitacao))
-        .slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
-    [rows, currentPage],
+        .slice(start, end),
+    [rows, start, end],
   );
 
   const filter = (setter: (value: string) => void, value: string) => {
@@ -202,7 +207,7 @@ export function useUtilizacoesVM() {
     setConveniado,
     beneficio,
     setBeneficio,
-    page,
+    page: currentPage,
     setPage,
     periodoInvalido,
     filter,

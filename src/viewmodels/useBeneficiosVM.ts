@@ -3,6 +3,7 @@ import { usePortal } from "./PortalContext";
 import { useToast } from "./ToastContext";
 import { conveniadoNome, formatMoney } from "../models/selectors";
 import type { Beneficio } from "../models/types";
+import { usePagination } from "../hooks/usePagination";
 
 const PAGE_SIZE = 8;
 
@@ -67,7 +68,7 @@ export function useBeneficiosVM() {
   );
   const [status, setStatus] = useState("");
   const [windowType, setWindowType] = useState("");
-  const [page, setPage] = useState(1);
+
 
   // ── Modais / formulário ──
   const [formOpen, setFormOpen] = useState(false);
@@ -90,15 +91,14 @@ export function useBeneficiosVM() {
         .includes(search.trim().toLocaleLowerCase("pt-BR")),
   );
 
-  const currentPage = Math.min(
-    page,
-    Math.max(1, Math.ceil(filtered.length / PAGE_SIZE)),
-  );
+const {
+  page: currentPage,
+  setPage,
+  start,
+  end,
+} = usePagination(filtered.length, PAGE_SIZE);
 
-  const visibleRows = filtered.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE,
-  );
+const visibleRows = filtered.slice(start, end);
 
   const activeOffers = (id: number) =>
     data.ofertas.filter(
@@ -300,7 +300,7 @@ export function useBeneficiosVM() {
     setStatus,
     windowType,
     setWindowType,
-    page,
+    page: currentPage,
     setPage,
 
     // dados derivados

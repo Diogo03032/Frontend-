@@ -1,26 +1,23 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 export function usePagination(total: number, pageSize: number) {
   const [page, setPage] = useState(1);
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const current = Math.min(page, totalPages);
 
-  useEffect(() => {
-    if (page > totalPages) setPage(totalPages);
-  }, [page, totalPages]);
-
-  const start = (page - 1) * pageSize;
+  const start = (current - 1) * pageSize;
   const end = Math.min(start + pageSize, total);
 
   return {
-    page,
+    page: current,
     setPage,
     totalPages,
     start,
     end,
-    hasPrev: page > 1,
-    hasNext: page < totalPages,
-    prev: () => setPage((p) => Math.max(p - 1, 1)),
-    next: () => setPage((p) => Math.min(p + 1, totalPages)),
+    hasPrev: current > 1,
+    hasNext: current < totalPages,
+    prev: () => setPage(Math.max(current - 1, 1)),
+    next: () => setPage(Math.min(current + 1, totalPages)),
     reset: () => setPage(1),
   };
 }

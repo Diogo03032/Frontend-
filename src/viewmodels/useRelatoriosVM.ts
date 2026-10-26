@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { usePortal } from "./PortalContext";
 import { useToast } from "./ToastContext";
 import { buildReport } from "../models/reportSelectors";
+import { usePagination } from "../hooks/usePagination";
 import {
   beneficioDaUtilizacao,
   colaboradorNome,
@@ -22,14 +23,13 @@ function csvCell(value: unknown) {
   return `"${(/^[=+\-@\t\r]/.test(text) ? `'${text}` : text).replaceAll('"', '""')}"`;
 }
 
-function paginate<T>(rows: T[], page: number) {
-  const current = Math.min(
-    page,
-    Math.max(1, Math.ceil(rows.length / REPORT_PAGE_SIZE)),
-  );
+function slicePage<T>(
+  rows: T[],
+  pagination: ReturnType<typeof usePagination>,
+) {
   return {
-    current,
-    rows: rows.slice((current - 1) * REPORT_PAGE_SIZE, current * REPORT_PAGE_SIZE),
+    current: pagination.page,
+    rows: rows.slice(pagination.start, pagination.end),
   };
 }
 
@@ -42,16 +42,28 @@ export function useRelatoriosVM() {
   );
   const [fim, setFim] = useState(() => dateOnly(now));
   const [tab, setTab] = useState("utilizacoes");
-  const [page, setPage] = useState(1);
   const report = useMemo(() => buildReport(data, inicio, fim), [data, inicio, fim]);
+  const benefitPagination = usePagination(report.benefits.length, REPORT_PAGE_SIZE);
+  const partnerPagination = usePagination(report.partners.length, REPORT_PAGE_SIZE);
+  const periodPagination = usePagination(report.periods.length, REPORT_PAGE_SIZE);
+  const campaignPagination = usePagination(report.campaigns.length, REPORT_PAGE_SIZE);
+
+  const setPage = (value: number) => {
+    benefitPagination.setPage(value);
+    partnerPagination.setPage(value);
+    periodPagination.setPage(value);
+    campaignPagination.setPage(value);
+  };
+
   const changeTab = (value: string) => {
     setTab(value);
     setPage(1);
   };
-  const benefitPage = paginate(report.benefits, page);
-  const partnerPage = paginate(report.partners, page);
-  const periodPage = paginate(report.periods, page);
-  const campaignPage = paginate(report.campaigns, page);
+
+  const benefitPage = slicePage(report.benefits, benefitPagination);
+  const partnerPage = slicePage(report.partners, partnerPagination);
+  const periodPage = slicePage(report.periods, periodPagination);
+  const campaignPage = slicePage(report.campaigns, campaignPagination);
   const delta = report.previous.length
     ? ((report.approved.length - report.previous.length) / report.previous.length) * 100
     : null;

@@ -2,6 +2,7 @@ import { useMemo, useState, type FormEvent } from "react";
 import { usePortal } from "./PortalContext";
 import { useToast } from "./ToastContext";
 import { colaboradorNome, formatMoney, statusLabel } from "../models/selectors";
+import { usePagination } from "../hooks/usePagination";
 
 export type PortalData = ReturnType<typeof usePortal>["data"];
 export type Campanha = PortalData["campanhas"][number];
@@ -49,8 +50,6 @@ export function useCampanhasVM() {
   const [status, setStatus] = useState("");
   const [inicio, setInicio] = useState("");
   const [fim, setFim] = useState("");
-  const [campaignPage, setCampaignPage] = useState(1);
-  const [eventPage, setEventPage] = useState(1);
 
   // ── Modais ──
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -93,19 +92,17 @@ export function useCampanhasVM() {
     .filter((item) => item.tipo.startsWith("EVENTO"))
     .sort((a, b) => b.data_inicio.localeCompare(a.data_inicio));
 
-  const paginate = (items: Campanha[], page: number) => {
-    const current = Math.min(
-      page,
-      Math.max(1, Math.ceil(items.length / PAGE_SIZE)),
-    );
-    return {
-      current,
-      rows: items.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE),
-    };
-  };
+const campaignPagination = usePagination(campaigns.length, PAGE_SIZE);
+const eventPagination = usePagination(events.length, PAGE_SIZE);
 
-  const campaignList = paginate(campaigns, campaignPage);
-  const eventList = paginate(events, eventPage);
+const campaignList = {
+  current: campaignPagination.page,
+  rows: campaigns.slice(campaignPagination.start, campaignPagination.end),
+};
+const eventList = {
+  current: eventPagination.page,
+  rows: events.slice(eventPagination.start, eventPagination.end),
+};
 
   const campanhaItems = data.itensCampanha.filter(
     (item) => item.campanha_id === selectedId,
@@ -136,11 +133,11 @@ export function useCampanhasVM() {
 
   const today = new Date().toLocaleDateString("sv-SE");
 
-  const filter = (setter: (value: string) => void, value: string) => {
-    setter(value);
-    setCampaignPage(1);
-    setEventPage(1);
-  };
+ const filter = (setter: (value: string) => void, value: string) => {
+  setter(value);
+  campaignPagination.reset();
+  eventPagination.reset();
+};
 
   // ── Ações ──
   function abrirForm(item?: Campanha) {
@@ -316,10 +313,10 @@ export function useCampanhasVM() {
     setInicio,
     fim,
     setFim,
-    campaignPage,
-    setCampaignPage,
-    eventPage,
-    setEventPage,
+    campaignPage: campaignPagination.page,
+    setCampaignPage: campaignPagination.setPage,
+    eventPage: eventPagination.page,
+    setEventPage: eventPagination.setPage,
     periodoInvalido,
     filter,
 

@@ -4,6 +4,7 @@ import { usePortal } from "./PortalContext";
 import { useToast } from "./ToastContext";
 import { isAdministrador } from "../models/selectors";
 import type { Escopo, Perfil, Usuario } from "../models/types";
+import { usePagination } from "../hooks/usePagination";
 
 const PAGE_SIZE = 8;
 
@@ -82,7 +83,6 @@ export function usePerfisVM() {
   );
   const [status, setStatus] = useState("");
   const [scope, setScope] = useState("");
-  const [page, setPage] = useState(1);
 
   // ── Modais / formulários ──
   const [profileFormOpen, setProfileFormOpen] = useState(false);
@@ -126,12 +126,9 @@ export function usePerfisVM() {
   );
 
   const total =
-    tab === "perfis" ? filteredProfiles.length : filteredUsers.length;
-  const currentPage = Math.min(
-    page,
-    Math.max(1, Math.ceil(total / PAGE_SIZE)),
-  );
-  const start = (currentPage - 1) * PAGE_SIZE;
+  tab === "perfis" ? filteredProfiles.length : filteredUsers.length;
+
+  const { page: currentPage, setPage, start } = usePagination(total, PAGE_SIZE);
 
   const availableProfiles = data.perfis.filter(
     (profile) =>
@@ -397,7 +394,7 @@ export function usePerfisVM() {
     setStatus,
     scope,
     setScope,
-    page,
+    page: currentPage,
     setPage,
 
     // dados derivados
