@@ -6,6 +6,10 @@ import {
   beneficioDaUtilizacao,
   colaboradorNome,
   conveniadoDaUtilizacao,
+  createDataIndexes,
+  colaboradorNomeIndexed,
+  beneficioDaUtilizacaoIndexed,
+  conveniadoDaUtilizacaoIndexed,
 } from "../models/selectors";
 
 type Utilizacao = ReturnType<typeof usePortal>["data"]["utilizacoes"][number];
@@ -55,49 +59,72 @@ export function useUtilizacoesVM() {
     }
   }
 
-  // ── Dados derivados ──
-  const rows = useMemo(
-    () =>
-      data.utilizacoes.filter((uso) => {
-        const item = beneficioDaUtilizacao(data, uso);
-        const parceiro = conveniadoDaUtilizacao(data, uso);
-        const dia = uso.data_solicitacao.slice(0, 10);
-        const texto =
-          `${uso.id} ${colaboradorNome(data, uso.colaborador_id)} ${item?.nome ?? ""} ${parceiro?.nome_fantasia ?? ""} ${parceiro?.razao_social ?? ""}`.toLocaleLowerCase(
-            "pt-BR",
-          );
-        return (
-          !periodoInvalido &&
-          texto.includes(search.toLocaleLowerCase("pt-BR")) &&
-          (!status || uso.status === status) &&
-          (!inicio || dia >= inicio) &&
-          (!fim || dia <= fim) &&
-          (!colaborador || uso.colaborador_id === Number(colaborador)) &&
-          (!conveniado || parceiro?.id === Number(conveniado)) &&
-          (!beneficio ||
-            `${uso.beneficio_conveniado_id ? "beneficio" : "campanha"}:${item?.id}` ===
-              beneficio)
+  // ── Índices e dados derivados memoizados em O(N) ──
+  const indexes = useMemo(() => createDataIndexes(data), [data]);
+
+  const enrichedRows = useMemo(() => {
+    return data.utilizacoes.map((uso) => {
+      const item = beneficioDaUtilizacaoIndexed(indexes, uso);
+      const parceiro = conveniadoDaUtilizacaoIndexed(indexes, uso);
+      const colabNome = colaboradorNomeIndexed(indexes, uso.colaborador_id);
+      const dia = uso.data_solicitacao.slice(0, 10);
+      const texto =
+        `${uso.id} ${colabNome} ${item?.nome ?? ""} ${parceiro?.nome_fantasia ?? ""} ${parceiro?.razao_social ?? ""}`.toLocaleLowerCase(
+          "pt-BR",
         );
-      }),
-    [
-      data,
-      search,
-      status,
-      inicio,
-      fim,
-      colaborador,
-      conveniado,
-      beneficio,
-      periodoInvalido,
-    ],
-  );
+      const beneficioKey = `${uso.beneficio_conveniado_id ? "beneficio" : "campanha"}:${item?.id}`;
+      return {
+        ...uso,
+        colaboradorNome: colabNome,
+        beneficioItem: item,
+        conveniadoItem: parceiro,
+        conveniadoId: parceiro?.id,
+        dia,
+        searchTarget: texto,
+        beneficioKey,
+      };
+    });
+  }, [data, indexes]);
+
+  const rows = useMemo(() => {
+    if (periodoInvalido) return [];
+    const term = search.trim().toLocaleLowerCase("pt-BR");
+    const colabNum = colaborador ? Number(colaborador) : null;
+    const convNum = conveniado ? Number(conveniado) : null;
+
+    return enrichedRows.filter((uso) => {
+      return (
+        (!term || uso.searchTarget.includes(term)) &&
+        (!status || uso.status === status) &&
+        (!inicio || uso.dia >= inicio) &&
+        (!fim || uso.dia <= fim) &&
+        (!colabNum || uso.colaborador_id === colabNum) &&
+        (!convNum || uso.conveniadoId === convNum) &&
+        (!beneficio || uso.beneficioKey === beneficio)
+      );
+    });
+  }, [
+    enrichedRows,
+    search,
+    status,
+    inicio,
+    fim,
+    colaborador,
+    conveniado,
+    beneficio,
+    periodoInvalido,
+  ]);
 
   const aprovadas = rows.filter((uso) => uso.status === "APROVADA");
   const pageCount = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
   const currentPage = Math.min(page, pageCount);
-  const visibleRows = [...rows]
-    .sort((a, b) => b.data_solicitacao.localeCompare(a.data_solicitacao))
-    .slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const visibleRows = useMemo(
+    () =>
+      [...rows]
+        .sort((a, b) => b.data_solicitacao.localeCompare(a.data_solicitacao))
+        .slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
+    [rows, currentPage],
+  );
 
   const filter = (setter: (value: string) => void, value: string) => {
     setter(value);

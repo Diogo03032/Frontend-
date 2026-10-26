@@ -238,7 +238,7 @@ export default function Utilizacoes() {
                 label: "Colaborador",
                 render: (row) => (
                   <span className="cell-title">
-                    {colaboradorNome(data, row.colaborador_id)}
+                    {row.colaboradorNome ?? colaboradorNome(data, row.colaborador_id)}
                   </span>
                 ),
               },
@@ -248,7 +248,8 @@ export default function Utilizacoes() {
                 render: (row) => (
                   <>
                     <span className="cell-title">
-                      {beneficioDaUtilizacao(data, row)?.nome ??
+                      {row.beneficioItem?.nome ??
+                        beneficioDaUtilizacao(data, row)?.nome ??
                         "Benefício não encontrado"}
                     </span>
                     <span className="cell-subtitle">
@@ -263,7 +264,7 @@ export default function Utilizacoes() {
                 key: "parceiro",
                 label: "Conveniado",
                 render: (row) => {
-                  const item = conveniadoDaUtilizacao(data, row);
+                  const item = row.conveniadoItem ?? conveniadoDaUtilizacao(data, row);
                   return (
                     item?.nome_fantasia ||
                     item?.razao_social ||
