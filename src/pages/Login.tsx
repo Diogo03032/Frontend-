@@ -1,27 +1,12 @@
-import { useState, type FormEvent } from "react";
 import { Navigate } from "react-router-dom";
 import { ArrowRight, Eye, EyeOff, LockKeyhole, UserRound, ShieldCheck } from "lucide-react";
-import { useAuth } from "../viewmodels/AuthContext";
+import { useLoginVM } from "../viewmodels/useLoginVM";
 import PasswordRecovery from "./PasswordRecovery";
 import Brand from "../components/Brand";
 import LocalDemoAccessButton from "../local-demo/LocalDemoAccessButton";
 import loginIllustration from "../images/login/Ilustraçãofcv.svg";
 export default function Login() {
-  const { user, restoring, login, loginLocal } = useAuth();
-  const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
-  const [visible, setVisible] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
-  const [recovering, setRecovering] = useState(false);
-  async function submit(event: FormEvent) {
-    event.preventDefault();
-    if (busy) return;
-    setBusy(true); setError("");
-    try { await login(email.trim(), senha); }
-    catch (error) { setError(error instanceof Error ? error.message : "Não foi possível entrar."); }
-    finally { setBusy(false); }
-  }
+  const { user, restoring, loginLocal, email, setEmail, senha, setSenha, visible, setVisible, busy, error, recovering, setRecovering, submit, beginRecovery } = useLoginVM();
   if (user) return <Navigate to="/" replace />;
   if (restoring) return <div className="loading-state" role="status"><span className="spinner" /><p>Verificando sua sessão…</p></div>;
   return <main className="login-page">
@@ -45,7 +30,7 @@ export default function Login() {
             {error && <p className="form-error" role="alert">{error}</p>}
             <button className="btn btn-primary login-submit" disabled={busy}>{busy ? "Entrando…" : "Entrar"}<ArrowRight size={23} /></button>
           </form>
-          <button className="login-forgot" type="button" onClick={() => { setError(""); setRecovering(true); }}>Esqueci minha senha</button>
+          <button className="login-forgot" type="button" onClick={beginRecovery}>Esqueci minha senha</button>
           <LocalDemoAccessButton disabled={busy} onAccess={loginLocal} />
           </>}
           <div className="login-security"><ShieldCheck size={29} /><span>Ambiente seguro</span></div>
